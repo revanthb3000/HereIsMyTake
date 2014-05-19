@@ -10,12 +10,11 @@ def getDBHandler():
     connectionString = "mysql://" + databaseConnectionStrings.userName + ":" + databaseConnectionStrings.password + "@" + databaseConnectionStrings.hostName + "/" + databaseConnectionStrings.dbName + ""
     db = DAL(connectionString, migrate=False)
     #Add all define_table statements in here.
+    db.define_table("userCredentials",Field("username", "string", length=255),Field("passwordDigest", "string", length=255),Field("passwordSalt", "string", length=255))
     print "Gave a DB Handler"
     return db
 
-def DBTest(db):
-    db.define_table("users", Field("username", "string", length=255), Field("password", "string", length=255));
-    db.users.insert(username="revanth", password="jj21k423h3n2jhj5jn")
+def DBInsertTest(db):
+    db.userCredentials.insert(username = "revanthb3000",passwordDigest = "1282398349sxxw2",passwordSalt = "ryanHiga")
     print db.tables()
     db.commit()
-    db.close()

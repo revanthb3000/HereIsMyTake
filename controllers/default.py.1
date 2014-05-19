@@ -24,25 +24,19 @@ import databaseQueries
 import MySQLdb
 
 def index():
-    response.view = "index.html"
+    response.flash = T("Welcome to web2py!")
+    db = databaseQueries.getDBHandler()
+    databaseQueries.DBInsertTest(db)
+    db.close()
     response.flash = T("Welcome to web2py!")
     return dict(message=T('Hello World'))
 
 def login():
     response.view = "login.html"
-    if((request.vars.email!=None) or (session.email!=None)):
-        session.email = request.vars.email
-        print session.email
-        redirect(URL('index'))
+    if(request.vars.email!=None):
+        print request.vars.email
     return dict(message=T('What\'s up ?'))
 
-def clearSession():
-    session.clear()
-    return "Test"
-
-def printSession():
-    print session.email
-    return "Hello"
 
 def user():
     """
