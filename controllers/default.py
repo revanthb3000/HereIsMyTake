@@ -46,30 +46,6 @@ def editProfile():
         response.flash = 'please fill out the form'
     return dict(form=form, username = auth.user.first_name + " " + auth.user.last_name)
 
-def login():
-    response.view = "login.html"
-    if((request.vars.email!=None) or (session.email!=None)):
-        session.email = request.vars.email
-        print session.email
-        redirect(URL('index'))
-    return dict(message=T('What\'s up ?'))
-
-def register():
-    response.view = "register.html"
-    if((request.vars.email!=None) or (session.email!=None)):
-        session.email = request.vars.email
-        print session.email
-        redirect(URL('index'))
-    return dict(message=T('What Up !!'))
-
-def clearSession():
-    session.clear()
-    return "Test"
-
-def printSession():
-    print session.email
-    return "Hello"
-
 def user():
     """
     exposes:
