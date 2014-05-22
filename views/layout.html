@@ -79,7 +79,28 @@
           <span class="icon-bar"></span>
         </button>
         {{=response.logo or ''}}
-        <ul id="navbar" class="nav pull-right">{{='auth' in globals() and auth.navbar(mode="dropdown") or ''}}</ul>
+        <ul id="navbar" class="nav pull-right">
+            {{if(auth.is_logged_in()):}}
+            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('index')}}">{{=auth.user.first_name}} </a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{=URL('editProfile')}}" rel="nofollow"><i class="icon icon-user glyphicon glyphicon-user"></i>Profile</a></li>
+                    <li><a href="{{=URL('user/change_password')}}" rel="nofollow"><i class="icon icon-lock glyphicon glyphicon-lock"></i>Password</a></li><li class="divider"></li>
+                    <li><a href="{{=URL('user/logout')}}"><i class="icon icon-off glyphicon glyphicon-off"></i> Logout</a></li>
+                </ul>
+            </li>
+
+            {{else:}}
+            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('user/login')}}">Login</a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{=URL('user/register')}}" rel="nofollow"><i class="icon icon-user glyphicon glyphicon-user"></i>Register</a></li>
+                    <li><a href="{{=URL('user/retrieve_password')}}" rel="nofollow"><i class="icon icon-lock glyphicon glyphicon-lock"></i> Lost password?</a></li><li class="divider"></li>
+                    <li><a href="{{=URL('user/login')}}"><i class="icon icon-off glyphicon glyphicon-off"></i> Login</a></li>
+                </ul>
+            </li>
+
+            {{pass}}
+        </ul>
+
         <div class="{{='nav-collapse' if is_mobile else 'nav'}}">
           {{if response.menu:}}
           {{=MENU(response.menu, _class='mobile-menu nav' if is_mobile else 'nav',mobile=is_mobile,li_class='dropdown',ul_class='dropdown-menu')}}
@@ -166,4 +187,3 @@
   <script src="{{=URL('static','js/share.js',vars=dict(static=URL('static','images')))}}"></script>
 </body>
 </html>
-
