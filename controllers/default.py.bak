@@ -24,14 +24,51 @@ import databaseQueries
 import MySQLdb
 
 def index():
-    response.flash = T("Welcome to web2py!")
     response.view = "index.html"
+    response.flash = T("Welcome to web2py!")
     return dict(message=T('Hello World'))
+
+@auth.requires_login()
+def editProfile():
+    response.view = "editprofile.html"
+    db = databaseQueries.getDBHandler()
+    rows = db(db.auth_user.id == auth.user.id).select()
+    record_id = None
+    if len(rows) == 1:
+        record_id = rows[0].id
+
+    form=SQLFORM(db.auth_user, record_id, showid = False)
+    if form.process().accepted:
+        response.flash = 'form accepted'
+    elif form.errors:
+        response.flash = 'form has errors'
+    else:
+        response.flash = 'please fill out the form'
+    return dict(form=form, username = auth.user.first_name + " " + auth.user.last_name)
 
 def login():
     response.view = "login.html"
+    if((request.vars.email!=None) or (session.email!=None)):
+        session.email = request.vars.email
+        print session.email
+        redirect(URL('index'))
     return dict(message=T('What\'s up ?'))
 
+def register():
+    response.view = "register.html"
+    if((request.vars.email!=None) or (session.email!=None)):
+        session.email = request.vars.email
+        print session.email
+        redirect(URL('index'))
+    return dict(message=T('What Up !!'))
+
+def clearSession():
+    session.clear()
+    return "Test"
+
+def printSession():
+    print session.email
+    return "Hello"
 
 def user():
     """

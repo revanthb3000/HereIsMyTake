@@ -11,7 +11,7 @@ def getDBHandler():
     db = DAL(connectionString, migrate=False)
     #Add all define_table statements in here.
     db.define_table("auth_user",
-                    Field("id","integer"),
+                    Field("id",""),
                     Field("first_name", "string", requires=IS_NOT_EMPTY()),
                     Field("last_name", "string", requires=IS_NOT_EMPTY()),
                     Field('Education','string'),
