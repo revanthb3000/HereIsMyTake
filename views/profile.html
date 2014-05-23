@@ -1,3 +1,9 @@
+{{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
-
 {{=BEAUTIFY(response._vars)}}
+
+{{block right_sidebar}}
+{{=IMG(_src=URL("download/" + fileName), _alt="DP",_width="200px",_height="200px")}}
+<br/>
+{{=A("Change Picture",_href=URL('editDisplayPicture'))}}
+{{end}}

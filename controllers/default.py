@@ -21,6 +21,7 @@ if 0:
 
 import databaseConnectionStrings
 import databaseQueries
+import utilityFunctions
 import MySQLdb
 
 def index():
@@ -33,6 +34,10 @@ def index():
 
 @auth.requires_login()
 def profile():
+    imagePrefix = "images/displayPictures/"
+    imageFileName = "defaultMale.png"
+    fileName = imagePrefix + imageFileName
+    appName = request.application
     response.view = 'profile.html'
     response.title = auth.user.first_name + " " + auth.user.last_name;
     db = databaseQueries.getDBHandler()
@@ -41,7 +46,16 @@ def profile():
     if len(rows) == 1:
         row = rows[0]
     db.close()
-    return dict(userInfo = row)
+    if (row.displayPicture!=None):
+        fileName = row.displayPicture
+    return dict(fileName = fileName , userInfo = row)
+
+@auth.requires_login()
+def editDisplayPicture():
+    response.view = "editpicture.html"
+    response.title = "Change your DP"
+    form=FORM(INPUT(_name='image',_id='image', _type='file'))
+    return dict(form = form)
 
 @auth.requires_login()
 def editProfile():
@@ -124,6 +138,7 @@ def download():
     allows downloading of uploaded files
     http://..../[app]/default/download/[filename]
     """
+    db = databaseQueries.getDBHandler()
     return response.download(request, db)
 
 

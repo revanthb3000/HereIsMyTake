@@ -19,8 +19,8 @@ def getDBHandler():
                     Field('Birthday','date'),
                     Field('AboutMe','text'),
                     Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other'])),
+                    Field('displayPicture', 'upload' ),
                     Field('Website','string'))
-    print "Gave a DB Handler"
     return db
 
 def DBInsertTest(db):
