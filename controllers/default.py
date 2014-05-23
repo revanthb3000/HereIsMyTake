@@ -25,12 +25,28 @@ import MySQLdb
 
 def index():
     response.view = "index.html"
-    response.flash = T("Welcome to web2py!")
-    return dict(message=T('Hello World'))
+    response.title = 'Welcome to h-M-t.'
+    username = 'Log in fella !'
+    if(auth.is_logged_in()):
+        username = auth.user.first_name + " " + auth.user.last_name
+    return dict(message=T('Hello World'),username = username)
+
+@auth.requires_login()
+def profile():
+    response.view = 'profile.html'
+    response.title = auth.user.first_name + " " + auth.user.last_name;
+    db = databaseQueries.getDBHandler()
+    rows = db(db.auth_user.id == auth.user.id).select()
+    row = None
+    if len(rows) == 1:
+        row = rows[0]
+    db.close()
+    return dict(userInfo = row)
 
 @auth.requires_login()
 def editProfile():
     response.view = "editprofile.html"
+    response.title = 'Editing Profile'
     db = databaseQueries.getDBHandler()
     rows = db(db.auth_user.id == auth.user.id).select()
     record_id = None
@@ -39,12 +55,51 @@ def editProfile():
 
     form=SQLFORM(db.auth_user, record_id, showid = False)
     if form.process().accepted:
-        response.flash = 'form accepted'
+        response.flash = 'Changes Saved.'
+        redirect(URL('profile'))
     elif form.errors:
-        response.flash = 'form has errors'
+        response.flash = 'Errors found in the form.'
     else:
-        response.flash = 'please fill out the form'
+        response.flash = 'Please fill the form.'
+    db.close()
     return dict(form=form, username = auth.user.first_name + " " + auth.user.last_name)
+
+def login():
+    if(auth.is_logged_in()):
+        redirect(URL('index'))
+    response.view = 'login.html'
+    response.title = 'Login'
+    form = auth.login()
+    return dict(form=form)
+
+def register():
+    if(auth.is_logged_in()):
+        redirect(URL('index'))
+    response.view = 'register.html'
+    response.title = 'Registration'
+    form = auth.register()
+    return dict(form=form)
+
+@auth.requires_login()
+def changePassword():
+    response.view = 'changepassword.html'
+    response.title = 'Change Password'
+    form = auth.change_password()
+    return dict(form=form)
+
+def retrievePassword():
+    if(auth.is_logged_in()):
+        redirect(URL('index'))
+    response.view = 'retrievepassword.html'
+    response.title = 'Retrieve Password'
+    form = auth.retrieve_password()
+    return dict(form = form)
+
+def logout():
+    if(auth.is_logged_in()):
+        auth.logout()
+    redirect(URL('index'))
+    return dict()
 
 def user():
     """
