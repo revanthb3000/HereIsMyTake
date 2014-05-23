@@ -50,6 +50,8 @@ auth.settings.extra_fields['auth_user']= [
   Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other']))]
 crud, service, plugins = Crud(db), Service(), PluginManager()
 
+auth.settings.login_url = URL('login')
+
 ## create all tables needed by auth if not custom tables
 auth.define_tables(username=False, signature=False)
 
