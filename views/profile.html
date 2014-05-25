@@ -3,7 +3,15 @@
 {{=BEAUTIFY(response._vars)}}
 
 {{block right_sidebar}}
-{{=IMG(_src=URL("download/" + fileName), _alt="DP",_width="200px",_height="200px")}}
+{{
+
+if("defaultMale.png" in fileName):
+    =IMG(_src=URL('static', fileName), _alt="DP",_width="200px",_height="200px")
+else:
+    =IMG(_src=URL("download/" + fileName), _alt="DP",_width="200px",_height="200px")
+pass
+
+}}
 <br/>
 {{=A("Change Picture",_href=URL('editDisplayPicture'))}}
 {{end}}

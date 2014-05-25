@@ -46,8 +46,14 @@ response.generic_patterns = ['*'] if request.is_local else []
 from gluon.tools import Auth, Crud, Service, PluginManager, prettydate
 auth = Auth(db)
 auth.settings.extra_fields['auth_user']= [
-  Field('Birthday','date'),
-  Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other']))]
+    Field('Birthday','date'),
+    Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other']))
+#   Field('Education','string'),
+#   Field('Occupation','string'),
+#   Field('AboutMe','text'),
+#   Field('displayPicture', 'upload' ),
+#   Field('Website','string')
+]
 crud, service, plugins = Crud(db), Service(), PluginManager()
 
 auth.settings.login_url = URL('login')

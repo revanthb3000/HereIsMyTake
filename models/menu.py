@@ -5,7 +5,7 @@
 ## Customize your APP title, subtitle and menus here
 #########################################################################
 
-response.logo = A(B('h-',SPAN('M'),'-t'),_class="brand",_href='http://www.github.com/revanthb3000')
+response.logo = A(B('h-',SPAN('M'),'-t'),_class="brand",_href=URL('index'))
 response.title = request.application.replace('_',' ').title()
 response.subtitle = ''
 
@@ -34,5 +34,18 @@ def _():
     app = request.application
     ctr = request.controller
     # useful links to internal and external resources
-    response.menu += [(T('Home'), False, URL('default', 'index'), [])]
+    response.menu += [
+        (SPAN('Takes', _class='highlighted'), False, '', [
+        (T('Submit Take'), False, URL('submitTake')),
+        (T('View Take'), False, URL('viewTake')),
+        (T('Plugins'), False, None, [
+                        ('plugin_wiki', False,
+                         'http://web2py.com/examples/default/download'),
+                        (T('Other Plugins'), False,
+                         'http://web2py.com/plugins'),
+                        (T('Layout Plugins'),
+                         False, 'http://web2py.com/layouts'),
+                        ])
+                ]
+         )]
 if DEVELOPMENT_MENU: _()

@@ -24,6 +24,15 @@ import databaseQueries
 import utilityFunctions
 import MySQLdb
 
+def tester():
+    if (auth.is_logged_in()):
+        db = databaseQueries.getDBHandler(auth.user.id)
+    else:
+        db = databaseQueries.getDBHandler(None)
+    db.topics.insert(topicName="Football",parentId=0)
+    db.close()
+    return "What is this ?"
+
 def index():
     response.view = "index.html"
     response.title = 'Welcome to h-M-t.'
@@ -40,13 +49,13 @@ def profile():
     appName = request.application
     response.view = 'profile.html'
     response.title = auth.user.first_name + " " + auth.user.last_name;
-    db = databaseQueries.getDBHandler()
+    db = databaseQueries.getDBHandler(auth.user.id)
     rows = db(db.auth_user.id == auth.user.id).select()
     row = None
     if len(rows) == 1:
         row = rows[0]
     db.close()
-    if (row.displayPicture!=None):
+    if (row.displayPicture!=None and row.displayPicture.strip()!=""):
         fileName = row.displayPicture
     return dict(fileName = fileName , userInfo = row)
 
@@ -61,7 +70,7 @@ def editDisplayPicture():
 def editProfile():
     response.view = "editprofile.html"
     response.title = 'Editing Profile'
-    db = databaseQueries.getDBHandler()
+    db = databaseQueries.getDBHandler(auth.user.id)
     rows = db(db.auth_user.id == auth.user.id).select()
     record_id = None
     if len(rows) == 1:
@@ -77,6 +86,41 @@ def editProfile():
         response.flash = 'Please fill the form.'
     db.close()
     return dict(form=form, username = auth.user.first_name + " " + auth.user.last_name)
+
+@auth.requires_login()
+def submitTake():
+    response.view = "submitTake.html"
+    response.title = "Submit Take"
+    db = databaseQueries.getDBHandler(auth.user.id)
+
+    takeContent = ""
+    form = SQLFORM(db.takes, showid = False)
+    if form.process().accepted:
+        print form.vars.takeContent
+        takeContent = form.vars.takeContent
+        #redirect(URL('index'))
+    elif form.errors:
+        response.flash = 'Errors found in the form.'
+    else:
+        response.flash = 'Please fill the form.'
+    db.close()
+    return dict(form=form, takeContent = takeContent)
+
+def viewTake():
+    response.view = 'viewTake.html'
+    response.title = 'View Take'
+    if (auth.is_logged_in()):
+        db = databaseQueries.getDBHandler(auth.user.id)
+    else:
+        db = databaseQueries.getDBHandler(None)
+    rows = db(db.takes.id == 2).select()
+    row = None
+    if len(rows) == 1:
+        row = rows[0]
+    db.close()
+    takeContent = row.takeContent
+    print takeContent
+    return dict(takeContent = takeContent)
 
 def login():
     if(auth.is_logged_in()):
@@ -138,7 +182,7 @@ def download():
     allows downloading of uploaded files
     http://..../[app]/default/download/[filename]
     """
-    db = databaseQueries.getDBHandler()
+    db = databaseQueries.getDBHandler(auth.user.id)
     return response.download(request, db)
 
 
