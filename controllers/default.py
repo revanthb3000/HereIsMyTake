@@ -39,7 +39,8 @@ def index():
     username = 'Log in fella !'
     if(auth.is_logged_in()):
         username = auth.user.first_name + " " + auth.user.last_name
-    return dict(message=T('Hello World'),username = username)
+    sampleViewTakeURL = URL('viewTake',vars=dict(takeId='2'))
+    return dict(sampleViewTakeURL = sampleViewTakeURL,username = username)
 
 @auth.requires_login()
 def profile():
@@ -108,18 +109,27 @@ def submitTake():
 
 def viewTake():
     response.view = 'viewTake.html'
-    response.title = 'View Take'
+
     if (auth.is_logged_in()):
         db = databaseQueries.getDBHandler(auth.user.id)
     else:
         db = databaseQueries.getDBHandler(None)
-    rows = db(db.takes.id == 2).select()
-    row = None
-    if len(rows) == 1:
-        row = rows[0]
-    db.close()
-    takeContent = row.takeContent
-    print takeContent
+
+    takeContent = ""
+    takeTitle = "View Take"
+    if(request.vars.takeId!=None):
+        rows = db(db.takes.id == int(request.vars.takeId)).select()
+        row = None
+        if len(rows) == 1:
+            row = rows[0]
+            takeContent = row.takeContent
+            takeTitle = row.takeTitle
+        db.close()
+
+    if(takeContent==""):
+        redirect(URL('index'))
+
+    response.title = takeTitle
     return dict(takeContent = takeContent)
 
 def login():
