@@ -44,21 +44,39 @@ def index():
 
 @auth.requires_login()
 def profile():
+    if(request.vars.userId==None):
+        redirect(URL('index'))
+
+    userId = request.vars.userId
     imagePrefix = "images/displayPictures/"
     imageFileName = "defaultMale.png"
     fileName = imagePrefix + imageFileName
-    appName = request.application
+
     response.view = 'profile.html'
-    response.title = auth.user.first_name + " " + auth.user.last_name;
-    db = databaseQueries.getDBHandler(auth.user.id)
-    rows = db(db.auth_user.id == auth.user.id).select()
+
+    db = databaseQueries.getDBHandler(userId)
+    isFollowing = databaseQueries.checkIfFollowing(db,userId,auth.user.id)
+
+    rows = db(db.auth_user.id == userId).select()
     row = None
     if len(rows) == 1:
         row = rows[0]
-    db.close()
+        db.close()
+    else:
+        db.close()
+        redirect(URL('index'))
+
+    response.title = row.first_name + " " + row.last_name;
+    followURL = ""
+    if(int(auth.user.id)!=int(userId)):
+        if(isFollowing):
+            followURL = URL('unfollow',vars=dict(userId = userId))
+        else:
+            followURL = URL('follow',vars=dict(userId = userId))
+
     if (row.displayPicture!=None and row.displayPicture.strip()!=""):
         fileName = row.displayPicture
-    return dict(fileName = fileName , userInfo = row)
+    return dict(fileName = fileName , userInfo = row, followURL = followURL, isFollowing = isFollowing)
 
 @auth.requires_login()
 def editDisplayPicture():
@@ -136,6 +154,40 @@ def viewTake():
     response.title = takeTitle
     response.subtitle = "Posted on " + str(timeOfTake)
     return dict(takeContent = takeContent, takeTitle = takeTitle, timeOfTake = timeOfTake)
+
+@auth.requires_login()
+def follow():
+    if(request.vars.userId==None):
+        redirect(URL('index'))
+
+    userId = request.vars.userId
+    db = databaseQueries.getDBHandler(auth.user.id)
+    if (databaseQueries.checkIfUserExists(db,userId)):
+        db.followRelations.insert(userId=userId,followerId=auth.user.id)
+        db.close()
+        redirect(URL('profile',vars=dict(userId = userId)))
+    else:
+        db.close()
+        redirect(URL('index'))
+
+    return dict()
+
+@auth.requires_login()
+def unfollow():
+    if(request.vars.userId==None):
+        redirect(URL('index'))
+
+    userId = request.vars.userId
+    db = databaseQueries.getDBHandler(auth.user.id)
+    if (databaseQueries.checkIfUserExists(db,userId)):
+        db((db.followRelations.userId==userId) & (db.followRelations.followerId==auth.user.id)).delete()
+        db.close()
+        redirect(URL('profile',vars=dict(userId = userId)))
+    else:
+        db.close()
+        redirect(URL('index'))
+
+    return dict()
 
 def login():
     if(auth.is_logged_in()):

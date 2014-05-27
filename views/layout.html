@@ -81,7 +81,7 @@
         {{=response.logo or ''}}
         <ul id="navbar" class="nav pull-right">
             {{if(auth.is_logged_in()):}}
-            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('profile')}}">{{=auth.user.first_name}} </a>
+            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('profile',vars=dict(userId = auth.user.id))}}">{{=auth.user.first_name}} </a>
                 <ul class="dropdown-menu">
                     <li><a href="{{=URL('editProfile')}}" rel="nofollow"><i class="icon icon-user glyphicon glyphicon-user"></i>Edit Profile</a></li>
                     <li><a href="{{=URL('changePassword')}}" rel="nofollow"><i class="icon icon-lock glyphicon glyphicon-lock"></i>Change Password</a></li><li class="divider"></li>

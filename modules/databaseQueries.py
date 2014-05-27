@@ -54,9 +54,26 @@ def getDBHandler(userId):
                     Field("id","integer"),
                     Field("takeId","integer"),
                     Field("topicId","integer"))
+
+    db.define_table("followRelations",
+                    Field("id","integer"),
+                    Field("userId","integer"),
+                    Field("followerId","integer"))
     return db
 
 def DBInsertTest(db):
     db.userCredentials.insert(username = "revanthb3000",passwordDigest = "1282398349sxxw2",passwordSalt = "ryanHiga")
     print db.tables()
     db.commit()
+
+def checkIfUserExists(db, userId):
+    rows = db(db.auth_user.id == userId).select()
+    if len(rows) == 1:
+        return True
+    return False
+
+def checkIfFollowing(db,userId,followerId):
+    rows = db((db.followRelations.userId==userId) & (db.followRelations.followerId==followerId)).select()
+    if len(rows) == 1:
+        return True
+    return False

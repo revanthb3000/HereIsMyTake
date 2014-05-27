@@ -13,5 +13,15 @@ pass
 
 }}
 <br/>
-{{=A("Change Picture",_href=URL('editDisplayPicture'))}}
+
+{{
+if (followURL!=""):
+    if(isFollowing):
+        =A("Unfollow",_href=followURL)
+    else:
+        =A("Follow",_href=followURL)
+    pass
+pass
+}}
+
 {{end}}
