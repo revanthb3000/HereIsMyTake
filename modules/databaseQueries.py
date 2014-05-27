@@ -4,6 +4,7 @@ This module will contain all DB functions starting from creating a DB handler to
 
 from gluon import *
 import databaseConnectionStrings
+import datetime
 
 """
 This function generates a db handler and returns it to you. Remember that it is your responsibility to close the db handle once you're done using it.
@@ -18,6 +19,10 @@ else:
 """
 def getDBHandler(userId):
     db = DAL(databaseConnectionStrings.connectionString, migrate=False)
+
+
+    if(userId==None):
+        userId = 0
 
     #Add all define_table statements in here.
     db.define_table("auth_user",
@@ -38,18 +43,12 @@ def getDBHandler(userId):
                     Field("topicName","string"),
                     Field("parentId","integer"))
 
-    if(userId!=None):
-        db.define_table("takes",
-                    Field("id","integer"),
-                    Field("takeTitle","string"),
-                    Field("takeContent","text"),
-                    Field("userId","integer",writable = False, readable = False, default=userId))
-    else:
-        db.define_table("takes",
-                    Field("id","integer"),
-                    Field("takeTitle","string"),
-                    Field("takeContent","text"),
-                    Field("userId","integer",writable = False, readable = False))
+    db.define_table("takes",
+                Field("id","integer"),
+                Field("takeTitle","string"),
+                Field("takeContent","text"),
+                Field("userId","integer",writable = False, readable = False, default=userId),
+                Field("timeOfTake","datetime",writable = False,readable = False))
 
     db.define_table("take_table_mapping",
                     Field("id","integer"),

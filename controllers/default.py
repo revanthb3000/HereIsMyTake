@@ -39,7 +39,7 @@ def index():
     username = 'Log in fella !'
     if(auth.is_logged_in()):
         username = auth.user.first_name + " " + auth.user.last_name
-    sampleViewTakeURL = URL('viewTake',vars=dict(takeId='2'))
+    sampleViewTakeURL = URL('viewTake',vars=dict(takeId='1'))
     return dict(sampleViewTakeURL = sampleViewTakeURL,username = username)
 
 @auth.requires_login()
@@ -97,7 +97,6 @@ def submitTake():
     takeContent = ""
     form = SQLFORM(db.takes, showid = False)
     if form.process().accepted:
-        print form.vars.takeContent
         takeContent = form.vars.takeContent
         #redirect(URL('index'))
     elif form.errors:
@@ -105,6 +104,9 @@ def submitTake():
     else:
         response.flash = 'Please fill the form.'
     db.close()
+
+    textarea = form.element('textarea')
+    textarea['_cols'] = 1000
     return dict(form=form, takeContent = takeContent)
 
 def viewTake():
@@ -117,6 +119,7 @@ def viewTake():
 
     takeContent = ""
     takeTitle = "View Take"
+    timeOfTake = ""
     if(request.vars.takeId!=None):
         rows = db(db.takes.id == int(request.vars.takeId)).select()
         row = None
@@ -124,13 +127,15 @@ def viewTake():
             row = rows[0]
             takeContent = row.takeContent
             takeTitle = row.takeTitle
+            timeOfTake = row.timeOfTake
         db.close()
 
     if(takeContent==""):
         redirect(URL('index'))
 
     response.title = takeTitle
-    return dict(takeContent = takeContent)
+    response.subtitle = "Posted on " + str(timeOfTake)
+    return dict(takeContent = takeContent, takeTitle = takeTitle, timeOfTake = timeOfTake)
 
 def login():
     if(auth.is_logged_in()):
