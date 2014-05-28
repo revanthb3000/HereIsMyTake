@@ -90,12 +90,8 @@ def editProfile():
     response.view = "editprofile.html"
     response.title = 'Editing Profile'
     db = databaseQueries.getDBHandler(auth.user.id)
-    rows = db(db.auth_user.id == auth.user.id).select()
-    record_id = None
-    if len(rows) == 1:
-        record_id = rows[0].id
 
-    form=SQLFORM(db.auth_user, record_id, showid = False)
+    form=SQLFORM(db.auth_user, auth.user.id, showid = False)
     if form.process().accepted:
         response.flash = 'Changes Saved.'
         redirect(URL('profile'))
@@ -116,7 +112,35 @@ def submitTake():
     form = SQLFORM(db.takes, showid = False)
     if form.process().accepted:
         takeContent = form.vars.takeContent
-        #redirect(URL('index'))
+        redirect(URL('viewTake',vars=dict(takeId = request.vars.takeId)))
+    elif form.errors:
+        response.flash = 'Errors found in the form.'
+    else:
+        response.flash = 'Please fill the form.'
+    db.close()
+
+    textarea = form.element('textarea')
+    textarea['_cols'] = 1000
+    return dict(form=form, takeContent = takeContent)
+
+@auth.requires_login()
+def editTake():
+    response.view = "submitTake.html"
+    response.title = "Edit Take"
+    db = databaseQueries.getDBHandler(auth.user.id)
+
+    userId = auth.user.id
+
+    if(request.vars.takeId==None or not(databaseQueries.checkIfUserTakePairExists(db, userId, request.vars.takeId)) ):
+        redirect(URL('index'))
+
+    takeId = request.vars.takeId
+
+    takeContent = ""
+    form = SQLFORM(db.takes, takeId, showid = False)
+    if form.process().accepted:
+        takeContent = form.vars.takeContent
+        redirect(URL('viewTake',vars=dict(takeId = request.vars.takeId)))
     elif form.errors:
         response.flash = 'Errors found in the form.'
     else:
@@ -130,30 +154,38 @@ def submitTake():
 def viewTake():
     response.view = 'viewTake.html'
 
+    userId = 0
     if (auth.is_logged_in()):
         db = databaseQueries.getDBHandler(auth.user.id)
+        userId = auth.user.id
     else:
         db = databaseQueries.getDBHandler(None)
 
+    takeId = request.vars.takeId
     takeContent = ""
     takeTitle = "View Take"
     timeOfTake = ""
-    if(request.vars.takeId!=None):
+    if(takeId!=None):
         rows = db(db.takes.id == int(request.vars.takeId)).select()
-        row = None
         if len(rows) == 1:
             row = rows[0]
             takeContent = row.takeContent
             takeTitle = row.takeTitle
             timeOfTake = row.timeOfTake
-        db.close()
+
+    response.title = takeTitle
+    response.subtitle = "Posted on " + str(timeOfTake)
+
+    editLink = ""
+    if(databaseQueries.checkIfUserTakePairExists(db, userId , takeId)):
+        editLink = URL('editTake',vars=dict(takeId = takeId))
+
+    db.close()
 
     if(takeContent==""):
         redirect(URL('index'))
 
-    response.title = takeTitle
-    response.subtitle = "Posted on " + str(timeOfTake)
-    return dict(takeContent = takeContent, takeTitle = takeTitle, timeOfTake = timeOfTake)
+    return dict(takeContent = takeContent, editLink = editLink)
 
 @auth.requires_login()
 def follow():

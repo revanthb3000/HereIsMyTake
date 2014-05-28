@@ -1,2 +1,7 @@
 {{extend 'layout.html'}}
+{{if editLink!="":}}
+<a href='{{=editLink}}'>Edit</a>
+<br/>
+<br/>
+{{pass}}
 {{=XML(takeContent)}}

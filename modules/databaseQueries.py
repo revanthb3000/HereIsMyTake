@@ -77,3 +77,9 @@ def checkIfFollowing(db,userId,followerId):
     if len(rows) == 1:
         return True
     return False
+
+def checkIfUserTakePairExists(db, userId, takeId):
+    rows = db((db.takes.userId==userId) & (db.takes.id==takeId)).select()
+    if len(rows) == 1:
+        return True
+    return False
