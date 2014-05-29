@@ -107,12 +107,32 @@ def submitTake():
     response.view = "submitTake.html"
     response.title = "Submit Take"
     db = databaseQueries.getDBHandler(auth.user.id)
-
     takeContent = ""
-    form = SQLFORM(db.takes, showid = False)
+
+    topicsList = databaseQueries.getListOfTopics(db)
+
+    fields = []
+    i = 1
+    while(i<len(topicsList)):
+        topicMapping = topicsList[i]
+        fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"])]
+        i = i + 1
+
+    fields += [field for field in db.takes]
+
+    form = SQLFORM.factory(*fields)
+
     if form.process().accepted:
         takeContent = form.vars.takeContent
-        redirect(URL('viewTake',vars=dict(takeId = request.vars.takeId)))
+        takeId = db.takes.insert(takeTitle = form.vars.takeTitle ,takeContent = form.vars.takeContent)
+        i = 1
+        while(i<len(topicsList)):
+            topicMapping = topicsList[i]
+            if(form.vars[topicMapping["topicName"]]):
+                db.take_topic_mapping.insert(takeId = takeId, topicId = i)
+            i = i + 1
+
+        redirect(URL('viewTake',vars=dict(takeId = takeId)))
     elif form.errors:
         response.flash = 'Errors found in the form.'
     else:
@@ -130,21 +150,52 @@ def editTake():
     db = databaseQueries.getDBHandler(auth.user.id)
 
     userId = auth.user.id
-
-    if(request.vars.takeId==None or not(databaseQueries.checkIfUserTakePairExists(db, userId, request.vars.takeId)) ):
-        redirect(URL('index'))
-
     takeId = request.vars.takeId
 
+    if(takeId==None or not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId)) ):
+        redirect(URL('index'))
+
+    db.takes.takeTitle.default = db.takes[takeId].takeTitle
+    db.takes.takeContent.default = db.takes[takeId].takeContent
+
+    topicsList = databaseQueries.getListOfTopics(db)
+    takeTopicsList = databaseQueries.getTakeTopicsList(db, takeId)
+
+    fields = []
+    i = 1
+    while(i<len(topicsList)):
+        topicMapping = topicsList[i]
+        fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"], default = (i in takeTopicsList))]
+        i = i + 1
+
+    fields += [field for field in db.takes]
+
+    form = SQLFORM.factory(*fields)
+
     takeContent = ""
-    form = SQLFORM(db.takes, takeId, showid = False)
     if form.process().accepted:
         takeContent = form.vars.takeContent
+        takeTitle = form.vars.takeTitle
+        row = db(db.takes.id==takeId).select().first()
+        row.takeContent = takeContent
+        row.takeTitle = takeTitle
+        row.update_record()
+
+        i = 1
+        while(i<len(topicsList)):
+            topicMapping = topicsList[i]
+            if(form.vars[topicMapping["topicName"]]):
+                db.take_topic_mapping.insert(takeId = takeId, topicId = i)
+            else:
+                db((db.take_topic_mapping.takeId==takeId) & (db.take_topic_mapping.topicId==i)).delete()
+            i = i + 1
+
         redirect(URL('viewTake',vars=dict(takeId = request.vars.takeId)))
     elif form.errors:
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
+
     db.close()
 
     textarea = form.element('textarea')
@@ -162,6 +213,9 @@ def viewTake():
         db = databaseQueries.getDBHandler(None)
 
     takeId = request.vars.takeId
+    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
+        takeId = None
+
     takeContent = ""
     takeTitle = "View Take"
     timeOfTake = ""

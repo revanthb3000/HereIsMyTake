@@ -12,3 +12,10 @@ def getUserImageFileName(appName, imagePrefix, userId):
     if(os.path.isfile(pngFileName)):
         return fileName + ".png"
     return None
+
+def checkIfVariableIsInt(var):
+    try:
+        x = int(var)
+    except:
+        return False
+    return True

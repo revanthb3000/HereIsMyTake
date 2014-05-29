@@ -50,7 +50,7 @@ def getDBHandler(userId):
                 Field("userId","integer",writable = False, readable = False, default=userId),
                 Field("timeOfTake","datetime",writable = False,readable = False))
 
-    db.define_table("take_table_mapping",
+    db.define_table("take_topic_mapping",
                     Field("id","integer"),
                     Field("takeId","integer"),
                     Field("topicId","integer"))
@@ -60,11 +60,6 @@ def getDBHandler(userId):
                     Field("userId","integer"),
                     Field("followerId","integer"))
     return db
-
-def DBInsertTest(db):
-    db.userCredentials.insert(username = "revanthb3000",passwordDigest = "1282398349sxxw2",passwordSalt = "ryanHiga")
-    print db.tables()
-    db.commit()
 
 def checkIfUserExists(db, userId):
     rows = db(db.auth_user.id == userId).select()
@@ -83,3 +78,26 @@ def checkIfUserTakePairExists(db, userId, takeId):
     if len(rows) == 1:
         return True
     return False
+
+def getListOfTopics(db):
+    rows = db(db.topics).select()
+    #TopicName, parentId tuple. I'll be able to get topicId from the list index.
+    topicMapping = {}
+    topicMapping["topicName"] = "None"
+    topicMapping["parentId"] = 0
+
+    topicsList = []
+    topicsList.append(topicMapping)
+    for row in rows:
+        topicMapping = {}
+        topicMapping["topicName"] = str(row.topicName)
+        topicMapping["parentId"] = int(row.parentId)
+        topicsList.append(topicMapping)
+    return topicsList
+
+def getTakeTopicsList(db, takeId):
+    rows = db(db.take_topic_mapping.takeId==takeId).select()
+    topics = []
+    for row in rows:
+        topics.append(row.topicId)
+    return topics
