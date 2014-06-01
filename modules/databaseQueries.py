@@ -129,3 +129,21 @@ Delete the following:
 def deleteTake(db, takeId):
     db(db.takes.id==takeId).delete()
     db(db.take_topic_mapping.takeId==takeId).delete()
+
+"""
+Given a topicId, this function will return all takes that fall under that category
+TODO: Have to limit number of rows.
+"""
+def getTopicTakes(db, topicId):
+    rows = db((db.take_topic_mapping.takeId==db.takes.id) & (db.take_topic_mapping.topicId == topicId)).select()
+    for row in rows:
+        print row
+
+"""
+Given a topicId, this function will tell you if a topic actually exists.
+"""
+def checkIfTopicExists(db, topicId):
+    rows = db(db.topics.id == userId).select()
+    if len(rows) == 1:
+        return True
+    return False

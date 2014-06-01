@@ -1,14 +1,4 @@
-# -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
-
-#########################################################################
-## This is a sample controller
-## - index is the default action of any application
-## - user is required for authentication and authorization
-## - download is for downloading files uploaded in the db (does streaming)
-## - call exposes all registered services (none by default)
-#########################################################################
-
+# Stuff to get eclipse autocomplete to work. Dead code !
 if 0:
     from modules import *
     from gluon import *
@@ -276,6 +266,14 @@ def deleteTake():
 
     db.close()
     return dict(form = form, takeTitle = takeTitle)
+
+def topicFeed():
+    response.view = "topicFeed.html"
+    response.title = "Topic Feed"
+    topicId = request.vars.topicId
+    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
+        topicId = None
+    return dict()
 
 @auth.requires_login()
 def follow():
