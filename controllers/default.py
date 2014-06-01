@@ -231,15 +231,51 @@ def viewTake():
     response.subtitle = "Posted on " + str(timeOfTake)
 
     editLink = ""
+    deleteLink = ""
     if(databaseQueries.checkIfUserTakePairExists(db, userId , takeId)):
         editLink = URL('editTake',vars=dict(takeId = takeId))
+        deleteLink = URL('deleteTake',vars=dict(takeId = takeId))
 
     db.close()
 
     if(takeContent==""):
         redirect(URL('index'))
 
-    return dict(takeContent = takeContent, editLink = editLink)
+    return dict(takeContent = takeContent, editLink = editLink, deleteLink = deleteLink)
+
+@auth.requires_login()
+def deleteTake():
+    response.view = "deleteTake.html"
+    response.title = "Delete Take"
+    db = databaseQueries.getDBHandler(auth.user.id)
+
+    userId = auth.user.id
+    takeId = request.vars.takeId
+
+    if(takeId==None or not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
+        redirect(URL('index'))
+
+    rows = db(db.takes.id == int(takeId)).select()
+    takeTitle = ""
+    if len(rows) == 1:
+        row = rows[0]
+        takeTitle = row.takeTitle
+
+    form = FORM(INPUT(_type='submit', _value='Yes', _name='yesDelete'), INPUT(_type='submit', _value="No", _name='noDelete'))
+
+    if form.process().accepted:
+        response.flash = 'Form Accepted.'
+        if(request.vars.yesDelete):
+            databaseQueries.deleteTake(db, takeId)
+        db.close()
+        redirect(URL('index'))
+    elif form.errors:
+        response.flash = 'Errors found in the form.'
+    else:
+        response.flash = 'Please fill the form.'
+
+    db.close()
+    return dict(form = form, takeTitle = takeTitle)
 
 @auth.requires_login()
 def follow():

@@ -61,24 +61,39 @@ def getDBHandler(userId):
                     Field("followerId","integer"))
     return db
 
+"""
+Given a userId, this function will tell you if that user actually exists.
+"""
 def checkIfUserExists(db, userId):
     rows = db(db.auth_user.id == userId).select()
     if len(rows) == 1:
         return True
     return False
 
+"""
+Given a <userId, followerId> tuple this function will return true if followerId follows userId.
+False, otherwise.
+"""
 def checkIfFollowing(db,userId,followerId):
     rows = db((db.followRelations.userId==userId) & (db.followRelations.followerId==followerId)).select()
     if len(rows) == 1:
         return True
     return False
 
+"""
+Given a <userId, takeId> pair, this function returns true if userId is the author of takeId
+"""
 def checkIfUserTakePairExists(db, userId, takeId):
     rows = db((db.takes.userId==userId) & (db.takes.id==takeId)).select()
     if len(rows) == 1:
         return True
     return False
 
+"""
+Basic function that gets the list of topics. Useful when classifying a take.
+The list returned, contains objects of the form:
+Dictionary : {"topicName": "Anime", "parentId": 5}
+"""
 def getListOfTopics(db):
     rows = db(db.topics).select()
     #TopicName, parentId tuple. I'll be able to get topicId from the list index.
@@ -95,9 +110,22 @@ def getListOfTopics(db):
         topicsList.append(topicMapping)
     return topicsList
 
+"""
+Given a takeId, this guy returns all the topics that have been tagged to it.
+"""
 def getTakeTopicsList(db, takeId):
     rows = db(db.take_topic_mapping.takeId==takeId).select()
     topics = []
     for row in rows:
         topics.append(row.topicId)
     return topics
+
+"""
+Given a takeId, this function gets rid of everything related to that take.
+Delete the following:
+1) Take info from the takes table.
+2) Take topic mapping from the take_topic_mapping table.
+"""
+def deleteTake(db, takeId):
+    db(db.takes.id==takeId).delete()
+    db(db.take_topic_mapping.takeId==takeId).delete()
