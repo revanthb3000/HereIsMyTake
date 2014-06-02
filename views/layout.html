@@ -81,20 +81,20 @@
         {{=response.logo or ''}}
         <ul id="navbar" class="nav pull-right">
             {{if(auth.is_logged_in()):}}
-            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('profile',vars=dict(userId = auth.user.id))}}">{{=auth.user.first_name}} </a>
+            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('users','profile',vars=dict(userId = auth.user.id))}}">{{=auth.user.first_name}} </a>
                 <ul class="dropdown-menu">
-                    <li><a href="{{=URL('editProfile')}}" rel="nofollow"><i class="icon icon-user glyphicon glyphicon-user"></i>Edit Profile</a></li>
-                    <li><a href="{{=URL('changePassword')}}" rel="nofollow"><i class="icon icon-lock glyphicon glyphicon-lock"></i>Change Password</a></li><li class="divider"></li>
-                    <li><a href="{{=URL('logout')}}"><i class="icon icon-off glyphicon glyphicon-off"></i> Logout</a></li>
+                    <li><a href="{{=URL('users','editProfile')}}" rel="nofollow"><i class="icon icon-user glyphicon glyphicon-user"></i>Edit Profile</a></li>
+                    <li><a href="{{=URL('users','changePassword')}}" rel="nofollow"><i class="icon icon-lock glyphicon glyphicon-lock"></i>Change Password</a></li><li class="divider"></li>
+                    <li><a href="{{=URL('users','logout')}}"><i class="icon icon-off glyphicon glyphicon-off"></i> Logout</a></li>
                 </ul>
             </li>
 
             {{else:}}
-            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('login')}}">Login</a>
+            <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown" href="{{=URL('users','login')}}">Login</a>
                 <ul class="dropdown-menu">
-                    <li><a href="{{=URL('register')}}" rel="nofollow"><i class="icon icon-user glyphicon glyphicon-user"></i>Register</a></li>
-                    <li><a href="{{=URL('retrievePassword')}}" rel="nofollow"><i class="icon icon-lock glyphicon glyphicon-lock"></i> Lost password ?</a></li><li class="divider"></li>
-                    <li><a href="{{=URL('login')}}"><i class="icon icon-off glyphicon glyphicon-off"></i> Login</a></li>
+                    <li><a href="{{=URL('users','register')}}" rel="nofollow"><i class="icon icon-user glyphicon glyphicon-user"></i>Register</a></li>
+                    <li><a href="{{=URL('users','retrievePassword')}}" rel="nofollow"><i class="icon icon-lock glyphicon glyphicon-lock"></i> Lost password ?</a></li><li class="divider"></li>
+                    <li><a href="{{=URL('users','login')}}"><i class="icon icon-off glyphicon glyphicon-off"></i> Login</a></li>
                 </ul>
             </li>
 

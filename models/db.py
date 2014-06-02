@@ -55,7 +55,7 @@ auth.settings.extra_fields['auth_user']= [
 ]
 crud, service, plugins = Crud(db), Service(), PluginManager()
 
-auth.settings.login_url = URL('login')
+auth.settings.login_url = URL('users','login')
 
 ## create all tables needed by auth if not custom tables
 auth.define_tables(username=False, signature=False)

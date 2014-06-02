@@ -36,8 +36,8 @@ def _():
     # useful links to internal and external resources
     response.menu += [
         (SPAN('Takes', _class='highlighted'), False, '', [
-        (T('Submit Take'), False, URL('submitTake')),
-        (T('View Take'), False, URL('viewTake')),
+        (T('Submit Take'), False, URL('takes','submitTake')),
+        (T('View Take'), False, URL('takes','viewTake')),
         (T('Plugins'), False, None, [
                         ('plugin_wiki', False,
                          'http://web2py.com/examples/default/download'),
