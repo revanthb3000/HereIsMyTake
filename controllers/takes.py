@@ -198,10 +198,26 @@ def deleteTake():
     db.close()
     return dict(form = form, takeTitle = takeTitle)
 
+@auth.requires_login()
 def topicFeed():
     response.view = "takes/topicFeed.html"
     response.title = "Topic Feed"
+
     topicId = request.vars.topicId
-    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
-        topicId = None
-    return dict()
+    if not(utilityFunctions.checkIfVariableIsInt(topicId)):
+        redirect(URL('default','index'))
+    pageNumber = 0
+    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
+        pageNumber = int(request.vars.page)
+
+    items_per_page=5
+    rangeLowerLimit = pageNumber*items_per_page
+    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+
+    nextUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber + 1))
+    previousUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber - 1))
+
+    db = databaseQueries.getDBHandler(auth.user.id)
+    rows = databaseQueries.getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit)
+    db.close()
+    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)

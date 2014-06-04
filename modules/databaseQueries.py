@@ -134,10 +134,10 @@ def deleteTake(db, takeId):
 Given a topicId, this function will return all takes that fall under that category
 TODO: Have to limit number of rows.
 """
-def getTopicTakes(db, topicId):
-    rows = db((db.take_topic_mapping.takeId==db.takes.id) & (db.take_topic_mapping.topicId == topicId)).select()
-    for row in rows:
-        print row
+def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db((db.take_topic_mapping.takeId==db.takes.id) & (db.take_topic_mapping.topicId == topicId)).select(limitby = limitby)
+    return rows
 
 """
 Given a topicId, this function will tell you if a topic actually exists.

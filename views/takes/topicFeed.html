@@ -1,3 +1,14 @@
 {{extend 'layout.html'}}
-<h1>This is the topicFeed.html template</h1>
-{{=BEAUTIFY(response._vars)}}
+
+{{for i,row in enumerate(rows):}}
+{{if i==items_per_page: break}}
+{{=row.takes.takeTitle}}<br />
+{{pass}}
+
+{{if page:}}
+<a href="{{=previousUrl}}">previous</a>
+{{pass}}
+
+{{if len(rows)>items_per_page:}}
+<a href="{{=nextUrl}}">next</a>
+{{pass}}
