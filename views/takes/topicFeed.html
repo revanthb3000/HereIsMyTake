@@ -2,13 +2,14 @@
 
 {{for i,row in enumerate(rows):}}
 {{if i==items_per_page: break}}
-{{=row.takes.takeTitle}}<br />
+<a href="{{=URL('takes','viewTake',vars=dict(takeId=row.takes.id))}}">{{=row.takes.takeTitle}}</a><br/>
 {{pass}}
 
+<br/>
 {{if page:}}
-<a href="{{=previousUrl}}">previous</a>
+<a href="{{=previousUrl}}">Previous</a>
 {{pass}}
 
 {{if len(rows)>items_per_page:}}
-<a href="{{=nextUrl}}">next</a>
+<a href="{{=nextUrl}}">Next</a>
 {{pass}}

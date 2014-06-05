@@ -20,8 +20,8 @@ def index():
     username = 'Log in fella !'
     if(auth.is_logged_in()):
         username = auth.user.first_name + " " + auth.user.last_name
-    sampleViewTakeURL = URL('takes','viewTake',vars=dict(takeId='1'))
-    return dict(sampleViewTakeURL = sampleViewTakeURL,username = username)
+    sampleNewsFeedURL = URL('takes','topicFeed',vars=dict(topicId='1'))
+    return dict(sampleNewsFeedURL = sampleNewsFeedURL,username = username)
 
 @cache.action()
 def download():

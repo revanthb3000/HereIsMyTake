@@ -146,6 +146,20 @@ def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
 
 
 """
+This function adds a <takeId, topicId> pair into the database
+"""
+def addTakeTopicMapping(db, takeId, topicId):
+    db.take_topic_mapping.insert(takeId = takeId, topicId = topicId)
+
+
+"""
+This function removes a <takeId, topicId> pair present in the database
+"""
+def removeTakeTopicMapping(db, takeId, topicId):
+    db((db.take_topic_mapping.takeId==takeId) & (db.take_topic_mapping.topicId==topicId)).delete()
+
+
+"""
 This function lets you either add a new take to the takes table.
 """
 def addTake(db, takeTitle, takeContent):
@@ -157,8 +171,8 @@ This function allows you to update the existing db record
 """
 def updateTake(db, newTakeTitle, newTakeContent, takeId):
     row = db(db.takes.id==takeId).select().first()
-    row.takeContent = newtakeContent
-    row.takeTitle = newtakeTitle
+    row.takeContent = newTakeContent
+    row.takeTitle = newTakeTitle
     row.update_record()
 
 

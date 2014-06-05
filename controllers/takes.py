@@ -23,6 +23,10 @@ def index():
     redirect(URL('default','index'))
     return dict()
 
+"""
+This is the control function to submit takes. 
+A rich text editor is provided and you get to select tags and submit the take content.
+"""
 @auth.requires_login()
 def submitTake():
     response.view = "takes/submitTake.html"
@@ -30,14 +34,14 @@ def submitTake():
     db = databaseQueries.getDBHandler(auth.user.id)
 
     takeContent = ""
-
     topicsList = databaseQueries.getListOfTopics(db)
+    numOfTopics = len(topicsList)
+
     fields = []
-    i = 1
-    while(i<len(topicsList)):
+
+    for i in range(1, numOfTopics):
         topicMapping = topicsList[i]
         fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"])]
-        i = i + 1
 
     fields += [field for field in db.takes]
     form = SQLFORM.factory(*fields)
@@ -45,12 +49,10 @@ def submitTake():
     if form.process().accepted:
         takeContent = form.vars.takeContent
         takeId = databaseQueries.addTake(db, form.vars.takeTitle, form.vars.takeContent)
-        i = 1
-        while(i<len(topicsList)):
+        for i in range(1, numOfTopics):
             topicMapping = topicsList[i]
             if(form.vars[topicMapping["topicName"]]):
-                db.take_topic_mapping.insert(takeId = takeId, topicId = i)
-            i = i + 1
+                databaseQueries.addTakeTopicMapping(db, takeId, i)
 
         redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
     elif form.errors:
@@ -62,46 +64,49 @@ def submitTake():
     textarea['_cols'] = 1000
     return dict(form=form, takeContent = takeContent)
 
+"""
+This is the control function to let a user edit a take he has previously submitted.
+Can edit content, title and tags.
+"""
 @auth.requires_login()
 def editTake():
     response.view = "takes/submitTake.html"
     response.title = "Edit Take"
-    db = databaseQueries.getDBHandler(auth.user.id)
 
     userId = auth.user.id
     takeId = request.vars.takeId
+    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
+        takeId = 0
 
-    if(takeId==None or not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId)) ):
+    db = databaseQueries.getDBHandler(userId)
+
+    if(not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
         redirect(URL('default','index'))
 
     db.takes.takeTitle.default = db.takes[takeId].takeTitle
     db.takes.takeContent.default = db.takes[takeId].takeContent
 
-    topicsList = databaseQueries.getListOfTopics(db)
     takeTopicsList = databaseQueries.getTakeTopicsList(db, takeId)
+    topicsList = databaseQueries.getListOfTopics(db)
+    numOfTopics = len(topicsList)
 
     fields = []
-    i = 1
-    while(i<len(topicsList)):
+    for i in range(1, numOfTopics):
         topicMapping = topicsList[i]
         fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"], default = (i in takeTopicsList))]
-        i = i + 1
 
     fields += [field for field in db.takes]
-
     form = SQLFORM.factory(*fields)
 
     takeContent = ""
     if form.process().accepted:
-        databaseQueries.updateTake(db, form.vars.takeContent, form.vars.takeTitle, takeId)
-        i = 1
-        while(i<len(topicsList)):
+        databaseQueries.updateTake(db, form.vars.takeTitle, form.vars.takeContent, takeId)
+        for i in range(1, numOfTopics):
             topicMapping = topicsList[i]
             if(form.vars[topicMapping["topicName"]]):
-                db.take_topic_mapping.insert(takeId = takeId, topicId = i)
+                databaseQueries.addTakeTopicMapping(db, takeId, i)
             else:
-                db((db.take_topic_mapping.takeId==takeId) & (db.take_topic_mapping.topicId==i)).delete()
-            i = i + 1
+                databaseQueries.removeTakeTopicMapping(db, takeId, i)
 
         redirect(URL('takes','viewTake',vars=dict(takeId = request.vars.takeId)))
     elif form.errors:
@@ -124,7 +129,6 @@ def viewTake():
     db = databaseQueries.getDBHandler(userId)
 
     takeId = request.vars.takeId
-
     if not(utilityFunctions.checkIfVariableIsInt(takeId)):
         takeId = 0
 
@@ -143,39 +147,46 @@ def viewTake():
 
     return dict(takeContent = row.takeContent, editLink = editLink, deleteLink = deleteLink)
 
+"""
+This control function is used to delete a take.
+Flow is as follows:
+(click delete) -> (click yes) -> eliminate from DB
+"""
 @auth.requires_login()
 def deleteTake():
     response.view = "takes/deleteTake.html"
     response.title = "Delete Take"
-    db = databaseQueries.getDBHandler(auth.user.id)
 
     userId = auth.user.id
     takeId = request.vars.takeId
+    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
+        takeId = 0
 
-    if(takeId==None or not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
+    db = databaseQueries.getDBHandler(userId)
+
+    if(not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
         redirect(URL('default','index'))
 
-    rows = db(db.takes.id == int(takeId)).select()
-    takeTitle = ""
-    if len(rows) == 1:
-        row = rows[0]
-        takeTitle = row.takeTitle
+    #No need to check if row == None. The above checkIfUserTakePairExists function does that for you !
+    row = databaseQueries.getTakeInfo(db, takeId)
 
-    form = FORM(INPUT(_type='submit', _value='Yes', _name='yesDelete'), INPUT(_type='submit', _value="No", _name='noDelete'))
+    form = FORM(
+                    INPUT(_type='submit', _value='Yes', _name='yesDelete'),
+                    INPUT(_type='submit', _value="No", _name='noDelete')
+                )
 
     if form.process().accepted:
-        response.flash = 'Form Accepted.'
         if(request.vars.yesDelete):
             databaseQueries.deleteTake(db, takeId)
-
         redirect(URL('default','index'))
     elif form.errors:
         response.flash = 'Errors found in the form.'
-    else:
-        response.flash = 'Please fill the form.'
 
-    return dict(form = form, takeTitle = takeTitle)
+    return dict(form = form, takeTitle = row.takeTitle)
 
+"""
+The topic feed control. Given a topicId, this will give you the list of takes in paginated form.
+"""
 @auth.requires_login()
 def topicFeed():
     response.view = "takes/topicFeed.html"
