@@ -10,56 +10,46 @@ import datetime
 This function generates a db handler and returns it to you. Remember that it is your responsibility to close the db handle once you're done using it.
 Important point is to send None as the userId in case you're calling this function in a page where the user need not be logged in.
 
-Here's a snippet that can be used : 
+Here's a snippet that can be used :
 
-if (auth.is_logged_in()):
-    db = databaseQueries.getDBHandler(auth.user.id)
-else:
-    db = databaseQueries.getDBHandler(None)
+userId = (auth.user.id) if (auth.is_logged_in()) else 0
+db = databaseQueries.getDBHandler(userId)
+
 """
 def getDBHandler(userId):
     db = DAL(databaseConnectionStrings.connectionString, migrate=False)
-
 
     if(userId==None):
         userId = 0
 
     #Add all define_table statements in here.
     db.define_table("auth_user",
-                    Field("id","integer"),
-                    Field("first_name", "string", requires=IS_NOT_EMPTY()),
-                    Field("last_name", "string", requires=IS_NOT_EMPTY()),
-                    Field("email", "string", requires=IS_NOT_EMPTY()),
-                    Field('Education','string'),
-                    Field('Occupation','string'),
-                    Field('Birthday','date'),
-                    Field('AboutMe','text'),
-                    Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other'])),
-                    Field('displayPicture', 'upload' ),
-                    Field('Website','string'))
+                        Field("id","integer"), Field("first_name", "string", requires=IS_NOT_EMPTY()),
+                        Field("last_name", "string", requires=IS_NOT_EMPTY()),Field("email", "string", requires=IS_NOT_EMPTY()),
+                        Field('Education','string'), Field('Occupation','string'), Field('Birthday','date'),
+                        Field('AboutMe','text'), Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other'])),
+                        Field('displayPicture', 'upload' ),Field('Website','string')
+                    )
 
     db.define_table("topics",
-                    Field("id","integer"),
-                    Field("topicName","string"),
-                    Field("parentId","integer"))
+                        Field("id","integer"), Field("topicName","string"), Field("parentId","integer")
+                    )
 
     db.define_table("takes",
-                Field("id","integer"),
-                Field("takeTitle","string"),
-                Field("takeContent","text"),
-                Field("userId","integer",writable = False, readable = False, default=userId),
-                Field("timeOfTake","datetime",writable = False,readable = False))
+                        Field("id","integer"), Field("takeTitle","string"), Field("takeContent","text"),
+                        Field("userId","integer",writable = False, readable = False, default=userId),
+                        Field("timeOfTake","datetime",writable = False,readable = False)
+                    )
 
     db.define_table("take_topic_mapping",
-                    Field("id","integer"),
-                    Field("takeId","integer"),
-                    Field("topicId","integer"))
+                        Field("id","integer"), Field("takeId","integer"), Field("topicId","integer")
+                    )
 
     db.define_table("followRelations",
-                    Field("id","integer"),
-                    Field("userId","integer"),
-                    Field("followerId","integer"))
+                        Field("id","integer"), Field("userId","integer"), Field("followerId","integer")
+                    )
     return db
+
 
 """
 Given a userId, this function will tell you if that user actually exists.
@@ -69,6 +59,7 @@ def checkIfUserExists(db, userId):
     if len(rows) == 1:
         return True
     return False
+
 
 """
 Given a <userId, followerId> tuple this function will return true if followerId follows userId.
@@ -80,6 +71,7 @@ def checkIfFollowing(db,userId,followerId):
         return True
     return False
 
+
 """
 Given a <userId, takeId> pair, this function returns true if userId is the author of takeId
 """
@@ -88,6 +80,17 @@ def checkIfUserTakePairExists(db, userId, takeId):
     if len(rows) == 1:
         return True
     return False
+
+
+"""
+Given a topicId, this function will tell you if a topic actually exists.
+"""
+def checkIfTopicExists(db, topicId):
+    rows = db(db.topics.id == userId).select()
+    if len(rows) == 1:
+        return True
+    return False
+
 
 """
 Basic function that gets the list of topics. Useful when classifying a take.
@@ -110,6 +113,7 @@ def getListOfTopics(db):
         topicsList.append(topicMapping)
     return topicsList
 
+
 """
 Given a takeId, this guy returns all the topics that have been tagged to it.
 """
@@ -119,6 +123,7 @@ def getTakeTopicsList(db, takeId):
     for row in rows:
         topics.append(row.topicId)
     return topics
+
 
 """
 Given a takeId, this function gets rid of everything related to that take.
@@ -130,20 +135,39 @@ def deleteTake(db, takeId):
     db(db.takes.id==takeId).delete()
     db(db.take_topic_mapping.takeId==takeId).delete()
 
+
 """
 Given a topicId, this function will return all takes that fall under that category
-TODO: Have to limit number of rows.
 """
 def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     rows = db((db.take_topic_mapping.takeId==db.takes.id) & (db.take_topic_mapping.topicId == topicId)).select(limitby = limitby)
     return rows
 
+
 """
-Given a topicId, this function will tell you if a topic actually exists.
+This function lets you either add a new take to the takes table.
 """
-def checkIfTopicExists(db, topicId):
-    rows = db(db.topics.id == userId).select()
+def addTake(db, takeTitle, takeContent):
+    takeId = db.takes.insert(takeTitle = takeTitle, takeContent = takeContent)
+    return takeId
+
+"""
+This function allows you to update the existing db record
+"""
+def updateTake(db, newTakeTitle, newTakeContent, takeId):
+    row = db(db.takes.id==takeId).select().first()
+    row.takeContent = newtakeContent
+    row.takeTitle = newtakeTitle
+    row.update_record()
+
+
+"""
+This function gets information of the take represented by takeId
+"""
+def getTakeInfo(db, takeId):
+    row = None
+    rows = db(db.takes.id == takeId).select()
     if len(rows) == 1:
-        return True
-    return False
+        row = rows[0]
+    return row

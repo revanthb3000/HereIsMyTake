@@ -28,10 +28,10 @@ def submitTake():
     response.view = "takes/submitTake.html"
     response.title = "Submit Take"
     db = databaseQueries.getDBHandler(auth.user.id)
+
     takeContent = ""
 
     topicsList = databaseQueries.getListOfTopics(db)
-
     fields = []
     i = 1
     while(i<len(topicsList)):
@@ -40,12 +40,11 @@ def submitTake():
         i = i + 1
 
     fields += [field for field in db.takes]
-
     form = SQLFORM.factory(*fields)
 
     if form.process().accepted:
         takeContent = form.vars.takeContent
-        takeId = db.takes.insert(takeTitle = form.vars.takeTitle ,takeContent = form.vars.takeContent)
+        takeId = databaseQueries.addTake(db, form.vars.takeTitle, form.vars.takeContent)
         i = 1
         while(i<len(topicsList)):
             topicMapping = topicsList[i]
@@ -58,7 +57,6 @@ def submitTake():
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
-    db.close()
 
     textarea = form.element('textarea')
     textarea['_cols'] = 1000
@@ -95,13 +93,7 @@ def editTake():
 
     takeContent = ""
     if form.process().accepted:
-        takeContent = form.vars.takeContent
-        takeTitle = form.vars.takeTitle
-        row = db(db.takes.id==takeId).select().first()
-        row.takeContent = takeContent
-        row.takeTitle = takeTitle
-        row.update_record()
-
+        databaseQueries.updateTake(db, form.vars.takeContent, form.vars.takeTitle, takeId)
         i = 1
         while(i<len(topicsList)):
             topicMapping = topicsList[i]
@@ -117,39 +109,31 @@ def editTake():
     else:
         response.flash = 'Please fill the form.'
 
-    db.close()
-
     textarea = form.element('textarea')
     textarea['_cols'] = 1000
     return dict(form=form, takeContent = takeContent)
 
+"""
+This is the control function for the view take activity.
+Basically, you retrieve data from the takes table and send it to the view.
+"""
 def viewTake():
     response.view = 'takes/viewTake.html'
 
-    userId = 0
-    if (auth.is_logged_in()):
-        db = databaseQueries.getDBHandler(auth.user.id)
-        userId = auth.user.id
-    else:
-        db = databaseQueries.getDBHandler(None)
+    userId = (auth.user.id) if (auth.is_logged_in()) else 0
+    db = databaseQueries.getDBHandler(userId)
 
     takeId = request.vars.takeId
+
     if not(utilityFunctions.checkIfVariableIsInt(takeId)):
-        takeId = None
+        takeId = 0
 
-    takeContent = ""
-    takeTitle = "View Take"
-    timeOfTake = ""
-    if(takeId!=None):
-        rows = db(db.takes.id == int(request.vars.takeId)).select()
-        if len(rows) == 1:
-            row = rows[0]
-            takeContent = row.takeContent
-            takeTitle = row.takeTitle
-            timeOfTake = row.timeOfTake
+    row = databaseQueries.getTakeInfo(db, takeId)
+    if row == None:
+        redirect(URL('default','index'))
 
-    response.title = takeTitle
-    response.subtitle = "Posted on " + str(timeOfTake)
+    response.title = row.takeTitle
+    response.subtitle = "Posted on " + str(row.timeOfTake)
 
     editLink = ""
     deleteLink = ""
@@ -157,12 +141,7 @@ def viewTake():
         editLink = URL('takes','editTake',vars=dict(takeId = takeId))
         deleteLink = URL('takes','deleteTake',vars=dict(takeId = takeId))
 
-    db.close()
-
-    if(takeContent==""):
-        redirect(URL('default','index'))
-
-    return dict(takeContent = takeContent, editLink = editLink, deleteLink = deleteLink)
+    return dict(takeContent = row.takeContent, editLink = editLink, deleteLink = deleteLink)
 
 @auth.requires_login()
 def deleteTake():
@@ -188,14 +167,13 @@ def deleteTake():
         response.flash = 'Form Accepted.'
         if(request.vars.yesDelete):
             databaseQueries.deleteTake(db, takeId)
-        db.close()
+
         redirect(URL('default','index'))
     elif form.errors:
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
 
-    db.close()
     return dict(form = form, takeTitle = takeTitle)
 
 @auth.requires_login()
@@ -219,5 +197,4 @@ def topicFeed():
 
     db = databaseQueries.getDBHandler(auth.user.id)
     rows = databaseQueries.getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit)
-    db.close()
     return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)

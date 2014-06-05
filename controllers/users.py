@@ -42,9 +42,7 @@ def profile():
     row = None
     if len(rows) == 1:
         row = rows[0]
-        db.close()
     else:
-        db.close()
         redirect(URL('default','index'))
 
     response.title = row.first_name + " " + row.last_name;
@@ -80,7 +78,6 @@ def editProfile():
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
-    db.close()
     return dict(form=form, username = auth.user.first_name + " " + auth.user.last_name)
 
 @auth.requires_login()
@@ -92,10 +89,8 @@ def follow():
     db = databaseQueries.getDBHandler(auth.user.id)
     if (databaseQueries.checkIfUserExists(db,userId)):
         db.followRelations.insert(userId=userId,followerId=auth.user.id)
-        db.close()
         redirect(URL('users','profile',vars=dict(userId = userId)))
     else:
-        db.close()
         redirect(URL('default','index'))
 
     return dict()
@@ -109,10 +104,8 @@ def unfollow():
     db = databaseQueries.getDBHandler(auth.user.id)
     if (databaseQueries.checkIfUserExists(db,userId)):
         db((db.followRelations.userId==userId) & (db.followRelations.followerId==auth.user.id)).delete()
-        db.close()
         redirect(URL('users','profile',vars=dict(userId = userId)))
     else:
-        db.close()
         redirect(URL('default','index'))
 
     return dict()
