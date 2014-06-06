@@ -139,13 +139,26 @@ def viewTake():
     response.title = row.takeTitle
     response.subtitle = "Posted on " + str(row.timeOfTake)
 
+    fields = [Field("commentContent","text")]
+    form = SQLFORM.factory(*fields, labels = {"commentContent":"Comment"})
+
+    if form.process().accepted:
+        databaseQueries.addComment(db, takeId, form.vars.commentContent)
+    elif form.errors:
+        response.flash = 'Errors found in the form.'
+
+    commentRows = databaseQueries.getTakeComments(db, takeId)
+
     editLink = ""
     deleteLink = ""
     if(databaseQueries.checkIfUserTakePairExists(db, userId , takeId)):
         editLink = URL('takes','editTake',vars=dict(takeId = takeId))
         deleteLink = URL('takes','deleteTake',vars=dict(takeId = takeId))
 
-    return dict(takeContent = row.takeContent, editLink = editLink, deleteLink = deleteLink)
+    textarea = form.element('textarea')
+    textarea['_cols'] = 1000
+    textarea['_rows'] = 2
+    return dict(takeContent = row.takeContent, editLink = editLink, deleteLink = deleteLink, form = form, comments = commentRows)
 
 """
 This control function is used to delete a take.

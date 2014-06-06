@@ -52,7 +52,7 @@ def getDBHandler(userId):
     db.define_table("comments",
                         Field("id","integer"), Field("userId","integer",default=userId),
                         Field("takeId","integer"), Field("commentContent","text"),
-                        Field("timeOfTake","datetime",writable = False,readable = False)
+                        Field("timeOfComment","datetime",writable = False,readable = False)
                     )
     return db
 

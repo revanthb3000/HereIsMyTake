@@ -6,3 +6,20 @@
 <br/>
 {{pass}}
 {{=XML(takeContent)}}
+
+<br/>
+<br/>
+{{=form}}
+<br/>
+<br/>
+{{
+for row in comments:
+    userId = row.auth_user.id
+    userName = row.auth_user.first_name + " " + row.auth_user.last_name
+    commentContent = row.comments.commentContent
+}}
+<a href="{{=URL('users','profile',vars=dict(userId = userId))}}">{{=userName}}</a> : {{=commentContent}}
+<br/>
+{{
+pass
+}}
