@@ -48,6 +48,12 @@ def getDBHandler(userId):
     db.define_table("followRelations",
                         Field("id","integer"), Field("userId","integer"), Field("followerId","integer")
                     )
+
+    db.define_table("comments",
+                        Field("id","integer"), Field("userId","integer",default=userId),
+                        Field("takeId","integer"), Field("commentContent","text"),
+                        Field("timeOfTake","datetime",writable = False,readable = False)
+                    )
     return db
 
 
@@ -166,6 +172,7 @@ def addTake(db, takeTitle, takeContent):
     takeId = db.takes.insert(takeTitle = takeTitle, takeContent = takeContent)
     return takeId
 
+
 """
 This function allows you to update the existing db record
 """
@@ -185,3 +192,35 @@ def getTakeInfo(db, takeId):
     if len(rows) == 1:
         row = rows[0]
     return row
+
+
+"""
+This function adds a comment to the comments table.
+"""
+def addComment(db, takeId, commentContent):
+    commentId = db.comments.insert(takeId = takeId, commentContent = commentContent)
+    return commentId
+
+"""
+Given a commentId, this function returns the comment contents of the table.
+"""
+def getComment(db, commentId):
+    row = None
+    rows = db(db.comments.id == commentId).select()
+    if len(rows) == 1:
+        row = rows[0]
+    return row
+
+"""
+Given a takeId, this function will return all the comments made on a take.
+"""
+def getTakeComments(db, takeId):
+    limitby=(0,5000)
+    rows = db((db.comments.userId==db.auth_user.id) & (db.comments.takeId == takeId)).select(limitby = limitby)
+    return rows
+
+"""
+Given a commentId, this function deletes the comment from the table.
+"""
+def deleteComment(db, commentId):
+    db(db.comments.id==commentId).delete()
