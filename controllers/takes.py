@@ -143,7 +143,7 @@ def viewTake():
     form = SQLFORM.factory(*fields, labels = {"commentContent":"Comment"})
 
     if form.process().accepted:
-        databaseQueries.addComment(db, takeId, form.vars.commentContent)
+        redirect(URL('takes','postComment',vars=dict(takeId = takeId, commentContent = form.vars.commentContent)))
     elif form.errors:
         response.flash = 'Errors found in the form.'
 
@@ -222,3 +222,20 @@ def topicFeed():
     db = databaseQueries.getDBHandler(auth.user.id)
     rows = databaseQueries.getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit)
     return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)
+
+"""
+The comment controller. Adds a comment and then sends you back to the page you belong to.
+"""
+@auth.requires_login()
+def postComment():
+    userId = auth.user.id
+    db = databaseQueries.getDBHandler(userId)
+
+    takeId = request.vars.takeId
+    commentContent = request.vars.commentContent
+    if((commentContent == None) or (commentContent.strip()=="") or (not(utilityFunctions.isTakeIdValid(takeId)))):
+        redirect(URL('default','index'))
+
+    databaseQueries.addComment(db, takeId, request.vars.commentContent)
+    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
+    return dict()
