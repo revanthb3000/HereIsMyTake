@@ -75,8 +75,8 @@ def editTake():
 
     userId = auth.user.id
     takeId = request.vars.takeId
-    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
-        takeId = 0
+    if not(utilityFunctions.isTakeIdValid(takeId)):
+        redirect(URL('default','index'))
 
     db = databaseQueries.getDBHandler(userId)
 
@@ -125,16 +125,14 @@ Basically, you retrieve data from the takes table and send it to the view.
 def viewTake():
     response.view = 'takes/viewTake.html'
 
+    takeId = request.vars.takeId
+    if not(utilityFunctions.isTakeIdValid(takeId)):
+        redirect(URL('default','index'))
+
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
     db = databaseQueries.getDBHandler(userId)
 
-    takeId = request.vars.takeId
-    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
-        takeId = 0
-
     row = databaseQueries.getTakeInfo(db, takeId)
-    if row == None:
-        redirect(URL('default','index'))
 
     response.title = row.takeTitle
     response.subtitle = "Posted on " + str(row.timeOfTake)
@@ -172,8 +170,8 @@ def deleteTake():
 
     userId = auth.user.id
     takeId = request.vars.takeId
-    if not(utilityFunctions.checkIfVariableIsInt(takeId)):
-        takeId = 0
+    if not(utilityFunctions.isTakeIdValid(takeId)):
+        redirect(URL('default','index'))
 
     db = databaseQueries.getDBHandler(userId)
 
@@ -237,5 +235,29 @@ def postComment():
         redirect(URL('default','index'))
 
     databaseQueries.addComment(db, takeId, request.vars.commentContent)
+    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
+    return dict()
+
+"""
+This controller lets you delete a comment.
+"""
+@auth.requires_login()
+def deleteComment():
+    userId = auth.user.id
+    db = databaseQueries.getDBHandler(userId)
+
+    commentId = request.vars.commentId
+    takeId = request.vars.takeId
+
+    if not(utilityFunctions.isTakeIdValid(takeId)):
+        redirect(URL('default','index'))
+
+    if not(utilityFunctions.checkIfVariableIsInt(commentId)):
+        commentId = 0
+
+    if not(databaseQueries.checkIfUserCommentPairExists(db, userId, commentId)):
+        redirect(URL('default','index'))
+
+    databaseQueries.deleteComment(db, commentId)
     redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
     return dict()

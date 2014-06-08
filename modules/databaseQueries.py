@@ -216,8 +216,17 @@ Given a takeId, this function will return all the comments made on a take.
 """
 def getTakeComments(db, takeId):
     limitby=(0,5000)
-    rows = db((db.comments.userId==db.auth_user.id) & (db.comments.takeId == takeId)).select(limitby = limitby)
+    rows = db((db.comments.userId==db.auth_user.id) & (db.comments.takeId == takeId)).select(limitby = limitby, orderby=db.comments.timeOfComment)
     return rows
+
+"""
+Given a <userId, commentId> pair, this function returns true if userId is the author of commentId
+"""
+def checkIfUserCommentPairExists(db, userId, commentId):
+    rows = db((db.comments.userId==userId) & (db.comments.id==commentId)).select()
+    if len(rows) == 1:
+        return True
+    return False
 
 """
 Given a commentId, this function deletes the comment from the table.
