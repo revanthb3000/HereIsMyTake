@@ -54,6 +54,13 @@ def getDBHandler(userId):
                         Field("takeId","integer"), Field("commentContent","text"),
                         Field("timeOfComment","datetime",writable = False,readable = False)
                     )
+
+    db.define_table("likes",
+                        Field("id","integer"), Field("articleId","integer"),
+                        Field("userId","integer",default=userId),
+                        Field("articleType",'string',requires = IS_IN_SET(['Take', 'Comment'])),
+                        Field("timeOfLike","datetime",writable = False,readable = False)
+                    )
     return db
 
 
@@ -233,3 +240,32 @@ Given a commentId, this function deletes the comment from the table.
 """
 def deleteComment(db, commentId):
     db(db.comments.id==commentId).delete()
+
+"""
+Given an articleId and articleType, an entry is made in the DB.
+"""
+def like(db, articleId, articleType):
+    likeId = db.likes.insert(articleId = articleId, articleType = articleType)
+    return likeId
+
+"""
+Given the information about a like, this function will remove the entry from the table.
+"""
+def unlike(db, articleId, articleType, userId):
+    db((db.likes.articleId==articleId) & (db.likes.articleType==articleType) & (db.likes.userId==userId)).delete()
+
+"""
+Given an article's info, this function returns the number of likes.
+"""
+def getNumberOfLikes(db, articleId, articleType):
+    rows = db((db.likes.articleId==articleId) & (db.likes.articleType == articleType)).select()
+    return len(rows)
+
+"""
+Given a userId and articleId, this function will tell you if that user has liked the article.
+"""
+def hasUserLikedArticle(db, articleId, articleType, userId):
+    rows = db((db.likes.userId==userId) & (db.likes.articleId==articleId) & (db.likes.articleType==articleType)).select()
+    if len(rows) == 1:
+        return True
+    return False
