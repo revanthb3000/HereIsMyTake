@@ -200,7 +200,6 @@ def getTakeInfo(db, takeId):
         row = rows[0]
     return row
 
-
 """
 This function adds a comment to the comments table.
 """
@@ -268,4 +267,18 @@ def hasUserLikedArticle(db, articleId, articleType, userId):
     rows = db((db.likes.userId==userId) & (db.likes.articleId==articleId) & (db.likes.articleType==articleType)).select()
     if len(rows) == 1:
         return True
+    return False
+
+"""
+This function returns true if the given take/comment actually exists.
+"""
+def checkIfArticleExists(db, articleId, articleType):
+    if(articleType==None):
+        return False
+
+    if((articleType=="Take") & (getTakeInfo(db, articleId)!=None)):
+        return True
+    elif((articleType=="Comment") & (getComment(db, articleId)!=None)):
+        return True
+
     return False

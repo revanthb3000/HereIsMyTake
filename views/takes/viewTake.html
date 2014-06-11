@@ -1,4 +1,15 @@
 {{extend 'layout.html'}}
+<a href='{{=takeLikeLink}}'><font color = "green">
+    {{
+        if("unlike" in takeLikeLink):
+            ="Unlike"
+        else:
+            ="Like"
+        pass
+    }}
+    ({{=numberOfLikes}})
+</font></a>
+<br/>
 {{if editLink!="":}}
 <a href='{{=editLink}}'>Edit</a>
 <a href='{{=deleteLink}}'><font color = "red">Delete</font></a>
@@ -6,30 +17,42 @@
 <br/>
 {{pass}}
 {{=XML(takeContent)}}
-
 <br/>
 <br/>
 {{=form}}
 <br/>
 <br/>
 {{
+index = 0
 for row in comments:
     userId = row.auth_user.id
     userName = row.auth_user.first_name + " " + row.auth_user.last_name
     commentContent = row.comments.commentContent
     takeId = row.comments.takeId
     commentId = row.comments.id
+    commentLikeLink = commentLikeLinks[index]
 }}
+<a href='{{=commentLikeLink}}'><font color = "green">
+    {{
+        if("unlike" in commentLikeLink):
+            ="Unlike"
+        else:
+            ="Like"
+        pass
+    }}
+    ({{=commentLikeCount[index]}})
+</font></a>
 <a href="{{=URL('users','profile',vars=dict(userId = userId))}}">{{=userName}}</a> : {{=commentContent}}
 <br/>
 {{
     if(auth.user.id==userId):
 }}
-<a href="{{=URL('takes','deleteComment',vars=dict(takeId= takeId, commentId = commentId))}}">Delete Comment</a>
+<a href="{{=URL('takes','deleteComment',vars=dict(takeId= takeId, commentId = commentId))}}"><font color = "red">Delete Comment</font></a>
 <br/>
 {{
     pass
 }}<br/>
 {{
+index = index + 1
 pass
 }}

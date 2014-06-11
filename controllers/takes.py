@@ -133,6 +133,11 @@ def viewTake():
     db = databaseQueries.getDBHandler(userId)
 
     row = databaseQueries.getTakeInfo(db, takeId)
+    numberOfLikes = databaseQueries.getNumberOfLikes(db, takeId, "Take")
+    likeAction = "like"
+    if(databaseQueries.hasUserLikedArticle(db, takeId, "Take", userId)):
+        likeAction = "unlike"
+    takeLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take", likeAction = likeAction))
 
     response.title = row.takeTitle
     response.subtitle = "Posted on " + str(row.timeOfTake)
@@ -146,6 +151,15 @@ def viewTake():
         response.flash = 'Errors found in the form.'
 
     commentRows = databaseQueries.getTakeComments(db, takeId)
+    commentLikeLinks = []
+    commentLikeCount = []
+    for commentRow in commentRows:
+        commentId = commentRow.comments.id
+        likeAction = "like"
+        if(databaseQueries.hasUserLikedArticle(db, commentId, "Comment", userId)):
+            likeAction = "unlike"
+        commentLikeLinks.append(URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment", likeAction = likeAction)))
+        commentLikeCount.append(databaseQueries.getNumberOfLikes(db, commentId, "Comment"))
 
     editLink = ""
     deleteLink = ""
@@ -156,7 +170,9 @@ def viewTake():
     textarea = form.element('textarea')
     textarea['_cols'] = 1000
     textarea['_rows'] = 2
-    return dict(takeContent = row.takeContent, editLink = editLink, deleteLink = deleteLink, form = form, comments = commentRows)
+    return dict(takeContent = row.takeContent, numberOfLikes = numberOfLikes,
+                editLink = editLink, deleteLink = deleteLink, takeLikeLink = takeLikeLink,
+                form = form, comments = commentRows, commentLikeLinks = commentLikeLinks, commentLikeCount = commentLikeCount)
 
 """
 This control function is used to delete a take.
@@ -259,5 +275,38 @@ def deleteComment():
         redirect(URL('default','index'))
 
     databaseQueries.deleteComment(db, commentId)
+    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
+    return dict()
+
+"""
+This is the controller that lets you like/unlike an article.
+"""
+@auth.requires_login()
+def changeLikeStatus():
+    userId = auth.user.id
+    db = databaseQueries.getDBHandler(userId)
+    articleType = request.vars.articleType
+    articleId = request.vars.articleId
+    likeAction = request.vars.likeAction
+
+    if ((likeAction==None) or (not(utilityFunctions.checkIfVariableIsInt(articleId)))):
+        redirect(URL('default','index'))
+
+    if not(databaseQueries.checkIfArticleExists(db, articleId, articleType)):
+        redirect(URL('default','index'))
+
+    if(likeAction=="like"):
+        databaseQueries.like(db, articleId, articleType)
+    elif(likeAction=="unlike"):
+        databaseQueries.unlike(db, articleId, articleType, userId)
+    else:
+        redirect(URL('default','index'))
+
+
+    takeId = articleId
+    if(articleType=="Comment"):
+        row = databaseQueries.getComment(db, articleId)
+        takeId = row.takeId
+
     redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
     return dict()
