@@ -4,7 +4,7 @@
 {{
 	takeLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take"))
 }}
-<a href='{{=takeLikeLink}}'><font color = "green">
+<a href='{{=takeLikeLink}}' onclick='likeRequests({{=takeId}},"Take")'><font color = "green">
     {{
         if(isTakeLiked):
             ="Unlike"
@@ -34,11 +34,10 @@ for row in comments:
     userId = row.auth_user.id
     userName = row.auth_user.first_name + " " + row.auth_user.last_name
     commentContent = row.comments.commentContent
-    takeId = row.comments.takeId
     commentId = row.comments.id
     commentLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
 }}
-<a href='{{=commentLikeLink}}'><font color = "green">
+<a href='{{=commentLikeLink}}' onclick='likeRequests({{=commentId}},"Comment")'><font color = "green">
     {{
         if(isCommentLiked[index]):
             ="Unlike"
