@@ -143,7 +143,7 @@ def viewTake():
     response.subtitle = "Posted on " + str(row.timeOfTake)
 
     fields = [Field("commentContent","text")]
-    form = SQLFORM.factory(*fields, labels = {"commentContent":"Comment"})
+    form = SQLFORM.factory(*fields, labels = {"commentContent":""}, submit_button = "Comment")
 
     if form.process().accepted:
         redirect(URL('takes','postComment',vars=dict(takeId = takeId, commentContent = form.vars.commentContent)))

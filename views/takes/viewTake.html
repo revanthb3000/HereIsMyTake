@@ -24,6 +24,7 @@
 <br/>
 {{
 index = 0
+viewerId = (auth.user.id) if (auth.is_logged_in()) else 0
 for row in comments:
     userId = row.auth_user.id
     userName = row.auth_user.first_name + " " + row.auth_user.last_name
@@ -45,7 +46,7 @@ for row in comments:
 <a href="{{=URL('users','profile',vars=dict(userId = userId))}}">{{=userName}}</a> : {{=commentContent}}
 <br/>
 {{
-    if(auth.user.id==userId):
+    if(viewerId==userId):
 }}
 <a href="{{=URL('takes','deleteComment',vars=dict(takeId= takeId, commentId = commentId))}}"><font color = "red">Delete Comment</font></a>
 <br/>
