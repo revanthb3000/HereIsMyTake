@@ -1,7 +1,12 @@
-{{extend 'layout.html'}}
+{{
+	extend 'layout.html'
+}}
+{{
+	takeLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take"))
+}}
 <a href='{{=takeLikeLink}}'><font color = "green">
     {{
-        if("unlike" in takeLikeLink):
+        if(isTakeLiked):
             ="Unlike"
         else:
             ="Like"
@@ -31,11 +36,11 @@ for row in comments:
     commentContent = row.comments.commentContent
     takeId = row.comments.takeId
     commentId = row.comments.id
-    commentLikeLink = commentLikeLinks[index]
+    commentLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
 }}
 <a href='{{=commentLikeLink}}'><font color = "green">
     {{
-        if("unlike" in commentLikeLink):
+        if(isCommentLiked[index]):
             ="Unlike"
         else:
             ="Like"
@@ -52,8 +57,9 @@ for row in comments:
 <br/>
 {{
     pass
-}}<br/>
+}}
+<br/>
 {{
-index = index + 1
-pass
+	index = index + 1
+	pass
 }}
