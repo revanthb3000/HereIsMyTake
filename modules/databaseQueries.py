@@ -99,7 +99,7 @@ def checkIfUserTakePairExists(db, userId, takeId):
 Given a topicId, this function will tell you if a topic actually exists.
 """
 def checkIfTopicExists(db, topicId):
-    rows = db(db.topics.id == userId).select()
+    rows = db(db.topics.id == topicId).select()
     if len(rows) == 1:
         return True
     return False

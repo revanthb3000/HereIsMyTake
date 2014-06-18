@@ -302,3 +302,8 @@ def changeLikeStatus():
 
     redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
     return dict()
+
+
+def echo():
+    print request.vars
+    return request.vars.name

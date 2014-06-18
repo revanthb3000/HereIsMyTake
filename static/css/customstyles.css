@@ -1,0 +1,12 @@
+.likeLink{
+	display: inline;
+}
+
+.likeLink a {color: #21610B;}
+
+.likeLink a:hover {color: #31B404;} 
+
+.likeCount{
+	display: inline;
+	color: #21610B;
+}

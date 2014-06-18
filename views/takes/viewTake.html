@@ -1,32 +1,52 @@
+{{right_sidebar_enabled=True}}
+{{extend 'layout.html'}}
+
+{{block right_sidebar}}
 {{
-	extend 'layout.html'
+fileName = "defaultMale.png"
+if("defaultMale.png" in fileName):
+    =IMG(_src=URL('static', fileName), _alt="DP",_width="200px",_height="200px")
+else:
+    =IMG(_src=URL("default","download/" + fileName), _alt="DP",_width="200px",_height="200px")
+pass
 }}
-{{
-	takeLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take"))
-}}
-<a href='{{=takeLikeLink}}' onclick='likeRequests({{=takeId}},"Take")'><font color = "green">
-    {{
-        if(isTakeLiked):
-            ="Unlike"
-        else:
-            ="Like"
-        pass
-    }}
-    ({{=numberOfLikes}})
-</font></a>
 <br/>
-{{if editLink!="":}}
-<a href='{{=editLink}}'>Edit</a>
-<a href='{{=deleteLink}}'><font color = "red">Delete</font></a>
+{{end}}
+
+
+<div class='likeCount' id = 'takeLikeCount'>
+	({{=numberOfLikes}})
+</div>
+
+{{ if(auth.is_logged_in()): }}
+	<div class="likeLink">
+		<a id="takeLike" onclick="ajax('{{=URL('takes', 'echo')}}', ['name'], 'takeLike')">
+		    {{
+		        if(isTakeLiked):
+		            ="Unlike"
+		        else:
+		            ="Like"
+		        pass
+		    }}
+		</a>
+	</div>
+{{ pass }}
+
 <br/>
-<br/>
+{{ if editLink!="": }}
+	<a href='{{=editLink}}'>Edit</a>
+	<a href='{{=deleteLink}}'><font color = "red">Delete</font></a>
+	<br/>
+	<br/>
 {{pass}}
+
 {{=XML(takeContent)}}
 <br/>
 <br/>
 {{=form}}
 <br/>
 <br/>
+
 {{
 index = 0
 viewerId = (auth.user.id) if (auth.is_logged_in()) else 0
@@ -36,24 +56,28 @@ for row in comments:
     commentContent = row.comments.commentContent
     commentId = row.comments.id
     commentLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
+    commentLikeAction = ("Unlike") if (isCommentLiked[index]) else "Like"
 }}
-<a href='{{=commentLikeLink}}' onclick='likeRequests({{=commentId}},"Comment")'><font color = "green">
-    {{
-        if(isCommentLiked[index]):
-            ="Unlike"
-        else:
-            ="Like"
-        pass
-    }}
-    ({{=commentLikeCount[index]}})
-</font></a>
+
+<div class='likeCount' id = '{{="commentLikeCount" + str(index)}}'>
+	({{=commentLikeCount[index]}})
+</div>
+
+{{ if(auth.is_logged_in()): }}
+	<div class="likeLink">
+		<a id = '{{="commentLike" + str(index)}}' onclick="ajax('{{=URL('takes', 'echo')}}', ['name'], '{{='commentLike' + str(index)}}')" >
+			{{=commentLikeAction}}
+		</a>
+	</div>
+{{ pass }}
+
 <a href="{{=URL('users','profile',vars=dict(userId = userId))}}">{{=userName}}</a> : {{=commentContent}}
 <br/>
 {{
     if(viewerId==userId):
 }}
-<a href="{{=URL('takes','deleteComment',vars=dict(takeId= takeId, commentId = commentId))}}"><font color = "red">Delete Comment</font></a>
-<br/>
+	<a href="{{=URL('takes','deleteComment',vars=dict(takeId= takeId, commentId = commentId))}}"><font color = "red">Delete Comment</font></a>
+	<br/>
 {{
     pass
 }}
