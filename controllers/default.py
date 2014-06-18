@@ -16,12 +16,8 @@ import MySQLdb
 
 def index():
     response.view = "default/index.html"
-    response.title = 'Welcome to h-M-t.'
-    username = 'Log in fella !'
-    if(auth.is_logged_in()):
-        username = auth.user.first_name + " " + auth.user.last_name
     sampleNewsFeedURL = URL('takes','topicFeed',vars=dict(topicId='1'))
-    return dict(sampleNewsFeedURL = sampleNewsFeedURL,username = username)
+    return dict(sampleNewsFeedURL = sampleNewsFeedURL)
 
 @cache.action()
 def download():

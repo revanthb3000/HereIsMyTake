@@ -1,8 +1,9 @@
-{{right_sidebar_enabled=True}}
+{{left_sidebar_enabled=True}}
 {{extend 'layout.html'}}
 
-{{block right_sidebar}}
-<a href="{{=URL('users','profile',vars=dict(userId = authorUserId))}}">{{=IMG(_src=profilePicLink, _alt="DP",_width="200px",_height="200px")}}</a>
+{{block left_sidebar}}
+<h3>Author:	</h3>
+<a href="{{=URL('users','profile',vars=dict(userId = authorUserId))}}">{{=IMG(_src=profilePicLink, _alt="DP",_width="150px",_height="150px")}}</a>
 <br/>
 {{end}}
 
@@ -11,13 +12,16 @@
 </div>
 
 {{ if(auth.is_logged_in()): }}
+{{
+	takeLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take"))
+}}
 	<div class="likeLink">
-		<a id="takeLike" onclick="ajax('{{=URL('takes', 'echo')}}', ['name'], 'takeLike')">
+		<a id="takeLike" href="{{=takeLikeLink}}">
 		    {{
 		        if(isTakeLiked):
-		            ="Unlike"
+		            =IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs")
 		        else:
-		            ="Like"
+		            =IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs")
 		        pass
 		    }}
 		</a>
@@ -48,7 +52,7 @@ for row in comments:
     commentContent = row.comments.commentContent
     commentId = row.comments.id
     commentLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
-    commentLikeAction = ("Unlike") if (isCommentLiked[index]) else "Like"
+    commentLikeAction = (IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs")) if (isCommentLiked[index]) else IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs")
 }}
 
 <div class='likeCount' id = '{{="commentLikeCount" + str(index)}}'>
@@ -57,7 +61,7 @@ for row in comments:
 
 {{ if(auth.is_logged_in()): }}
 	<div class="likeLink">
-		<a id = '{{="commentLike" + str(index)}}' onclick="ajax('{{=URL('takes', 'echo')}}', ['name'], '{{='commentLike' + str(index)}}')" >
+		<a id = '{{="commentLike" + str(index)}}' href = '{{=commentLikeLink}}'>
 			{{=commentLikeAction}}
 		</a>
 	</div>

@@ -1,4 +1,10 @@
-{{extend 'layout.html'}}
-{{=BEAUTIFY(response._vars)}}
-<br/>
-<a href='{{=sampleNewsFeedURL}}'>News Feed</a>
+<html>
+<title>Welcome to HereIsMyTake</title>
+<body bgcolor="#214D3E">
+<div align="center">
+<a href='{{=sampleNewsFeedURL}}'>
+	{{=IMG(_src=URL('static','images/banner.jpg'), _alt="Banner")}}
+</a>
+</div>
+</body>
+</html>
