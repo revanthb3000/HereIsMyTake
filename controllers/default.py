@@ -29,7 +29,8 @@ def download():
     allows downloading of uploaded files
     http://..../[app]/default/download/[filename]
     """
-    db = databaseQueries.getDBHandler(auth.user.id)
+    userId = (auth.user.id) if (auth.is_logged_in()) else 0
+    db = databaseQueries.getDBHandler(userId)
     return response.download(request, db)
 
 

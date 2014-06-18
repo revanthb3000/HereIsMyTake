@@ -2,17 +2,9 @@
 {{extend 'layout.html'}}
 
 {{block right_sidebar}}
-{{
-fileName = "defaultMale.png"
-if("defaultMale.png" in fileName):
-    =IMG(_src=URL('static', fileName), _alt="DP",_width="200px",_height="200px")
-else:
-    =IMG(_src=URL("default","download/" + fileName), _alt="DP",_width="200px",_height="200px")
-pass
-}}
+<a href="{{=URL('users','profile',vars=dict(userId = authorUserId))}}">{{=IMG(_src=profilePicLink, _alt="DP",_width="200px",_height="200px")}}</a>
 <br/>
 {{end}}
-
 
 <div class='likeCount' id = 'takeLikeCount'>
 	({{=numberOfLikes}})

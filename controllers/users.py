@@ -29,9 +29,6 @@ def profile():
         redirect(URL('default','index'))
 
     userId = request.vars.userId
-    imagePrefix = "images/displayPictures/"
-    imageFileName = "defaultMale.png"
-    fileName = imagePrefix + imageFileName
 
     response.view = 'users/profile.html'
 
@@ -53,9 +50,8 @@ def profile():
         else:
             followURL = URL('users','follow',vars=dict(userId = userId))
 
-    if (row.displayPicture!=None and row.displayPicture.strip()!=""):
-        fileName = row.displayPicture
-    return dict(fileName = fileName , userInfo = row, followURL = followURL, isFollowing = isFollowing)
+    profilePicLink = databaseQueries.getUserProfilePicture(db, userId)
+    return dict(profilePicLink = profilePicLink , userInfo = row, followURL = followURL, isFollowing = isFollowing)
 
 @auth.requires_login()
 def editDisplayPicture():

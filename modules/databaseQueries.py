@@ -73,6 +73,23 @@ def checkIfUserExists(db, userId):
         return True
     return False
 
+"""
+Given a userId, this function will return the user's profile picture link
+"""
+def getUserProfilePicture(db, userId):
+    rows = db(db.auth_user.id == userId).select()
+    link =""
+    fileName = "images/displayPictures/defaultMale.png"
+    row = None
+    if len(rows) == 1:
+        row = rows[0]
+        if (row.displayPicture!=None and row.displayPicture.strip()!=""):
+            fileName = row.displayPicture
+    if("defaultMale.png" in fileName):
+        link = URL('static', fileName)
+    else:
+        link = URL("default","download/" + fileName)
+    return link
 
 """
 Given a <userId, followerId> tuple this function will return true if followerId follows userId.

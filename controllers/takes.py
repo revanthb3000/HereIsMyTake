@@ -133,6 +133,7 @@ def viewTake():
     db = databaseQueries.getDBHandler(userId)
 
     row = databaseQueries.getTakeInfo(db, takeId)
+    authorUserId = row.userId
     numberOfLikes = databaseQueries.getNumberOfLikes(db, takeId, "Take")
     isTakeLiked = databaseQueries.hasUserLikedArticle(db, takeId, "Take", userId)
 
@@ -164,9 +165,15 @@ def viewTake():
     textarea = form.element('textarea')
     textarea['_cols'] = 1000
     textarea['_rows'] = 2
+    
+    
+    isFollowing = databaseQueries.checkIfFollowing(db,authorUserId,userId)
+    profilePicLink = databaseQueries.getUserProfilePicture(db, authorUserId)
+    
     return dict(takeId = takeId, takeContent = row.takeContent, numberOfLikes = numberOfLikes,
                 editLink = editLink, deleteLink = deleteLink, isTakeLiked = isTakeLiked,
-                form = form, comments = commentRows, isCommentLiked = isCommentLiked, commentLikeCount = commentLikeCount)
+                form = form, comments = commentRows, isCommentLiked = isCommentLiked, 
+                commentLikeCount = commentLikeCount, profilePicLink = profilePicLink, authorUserId = authorUserId)
 
 """
 This control function is used to delete a take.
