@@ -314,3 +314,8 @@ def changeLikeStatus():
 def echo():
     print request.vars
     return request.vars.name
+
+@auth.requires_login()
+def tiles():
+    redirect(URL('takes','topicFeed',vars=dict(topicId='1')))
+    return dict()

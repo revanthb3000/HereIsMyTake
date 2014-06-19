@@ -19,9 +19,9 @@
 		<a id="takeLike" href="{{=takeLikeLink}}">
 		    {{
 		        if(isTakeLiked):
-		            =IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs")
+		            =IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs", _width="40px",_height="40px")
 		        else:
-		            =IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs")
+		            =IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _width="40px",_height="40px")
 		        pass
 		    }}
 		</a>
@@ -52,7 +52,7 @@ for row in comments:
     commentContent = row.comments.commentContent
     commentId = row.comments.id
     commentLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
-    commentLikeAction = (IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs")) if (isCommentLiked[index]) else IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs")
+    commentLikeAction = (IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs", _width="40px",_height="40px")) if (isCommentLiked[index]) else IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _width="40px",_height="40px")
 }}
 
 <div class='likeCount' id = '{{="commentLikeCount" + str(index)}}'>
