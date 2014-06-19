@@ -101,6 +101,15 @@ def checkIfFollowing(db,userId,followerId):
         return True
     return False
 
+"""
+Given a userId, the list of users followed by that user is returned.
+"""
+def getFollowedUsers(db, userId):
+    rows = db(db.followRelations.followerId==userId).select()
+    users = []
+    for row in rows:
+        users.append(int(row.userId))
+    return users
 
 """
 Given a <userId, takeId> pair, this function returns true if userId is the author of takeId
@@ -174,6 +183,13 @@ def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
     rows = db((db.take_topic_mapping.takeId==db.takes.id) & (db.take_topic_mapping.topicId == topicId)).select(limitby = limitby)
     return rows
 
+"""
+Given a list of userIds, the takes that have been posted by these guys is retrieved.
+"""
+def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db(db.takes.userId.belongs(userIdList)).select(limitby = limitby)
+    return rows
 
 """
 This function adds a <takeId, topicId> pair into the database

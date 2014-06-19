@@ -239,6 +239,18 @@ def topicFeed():
     return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)
 
 """
+This is the subscription feed where you get the takes posted by the users you follow.
+"""
+@auth.requires_login()
+def subscriptionFeed():
+    userId = auth.user.id
+    db = databaseQueries.getDBHandler(userId)
+    userIdList = databaseQueries.getFollowedUsers(db, userId)
+    print userIdList
+    print databaseQueries.getUserTakes(db, userIdList, 0, 20)
+    return "Nothing"
+
+"""
 The comment controller. Adds a comment and then sends you back to the page you belong to.
 """
 @auth.requires_login()
