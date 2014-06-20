@@ -184,6 +184,13 @@ def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
     return rows
 
 """
+Same as the previous function but sorting is done based on the number of likes.
+"""
+def getTopicTakesLikeSorted(db, topicId, rangeLowerLimit, rangeUpperLimit):
+    query = "SELECT articleId, COUNT(userId) AS likeCount FROM `likes` JOIN take_topic_mapping ON articleId=takeId where (articleType = 'Take' and topicId=1) GROUP BY articleId ORDER BY likeCount DESC"
+    return None
+
+"""
 Given a list of userIds, the takes that have been posted by these guys is retrieved.
 """
 def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
@@ -290,8 +297,7 @@ def unlike(db, articleId, articleType, userId):
 Given an article's info, this function returns the number of likes.
 """
 def getNumberOfLikes(db, articleId, articleType):
-    rows = db((db.likes.articleId==articleId) & (db.likes.articleType == articleType)).select()
-    return len(rows)
+    return db((db.likes.articleId==articleId) & (db.likes.articleType == articleType)).count()
 
 """
 Given a userId and articleId, this function will tell you if that user has liked the article.
