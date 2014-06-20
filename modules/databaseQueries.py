@@ -187,8 +187,9 @@ def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
 Same as the previous function but sorting is done based on the number of likes.
 """
 def getTopicTakesLikeSorted(db, topicId, rangeLowerLimit, rangeUpperLimit):
-    query = "SELECT articleId, COUNT(userId) AS likeCount FROM `likes` JOIN take_topic_mapping ON articleId=takeId where (articleType = 'Take' and topicId=1) GROUP BY articleId ORDER BY likeCount DESC"
-    return None
+    query = "SELECT articleId, likes.userId AS userId, takeTitle, takeContent, timeOfTake, COUNT(articleId) AS likeCount FROM `likes` JOIN take_topic_mapping ON articleId=takeId JOIN takes ON takes.id = articleId where (articleType = 'Take' and topicId = "+str(topicId)+") GROUP BY articleId ORDER BY likeCount DESC"
+    rows = db.executesql(query, as_dict =True)
+    return rows
 
 """
 Given a list of userIds, the takes that have been posted by these guys is retrieved.

@@ -248,6 +248,7 @@ def subscriptionFeed():
     userIdList = databaseQueries.getFollowedUsers(db, userId)
     print userIdList
     print databaseQueries.getUserTakes(db, userIdList, 0, 20)
+    print databaseQueries.getTopicTakesLikeSorted(db, 1, 0, 10)
     return "Nothing"
 
 """
