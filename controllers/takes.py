@@ -326,6 +326,9 @@ def changeLikeStatus():
 
 def echo():
     print request.vars
+    userId = auth.user.id
+    db = databaseQueries.getDBHandler(userId)
+    print databaseQueries.checkIfTakeTopicMappingExists(db, 1, 1)
     return request.vars.name
 
 @auth.requires_login()

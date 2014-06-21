@@ -192,18 +192,20 @@ def getTopicTakesLikeSorted(db, topicId, rangeLowerLimit, rangeUpperLimit):
     return rows
 
 """
-Given a list of userIds, the takes that have been posted by these guys is retrieved.
+Given a takeId and topicId, this function tells you if the mapping exists
 """
-def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
-    limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db(db.takes.userId.belongs(userIdList)).select(limitby = limitby)
-    return rows
+def checkIfTakeTopicMappingExists(db, takeId, topicId):
+    rows = db((db.take_topic_mapping.topicId==topicId) & (db.take_topic_mapping.takeId==takeId)).select()
+    if(len(rows)==1):
+        return True
+    return False
 
 """
 This function adds a <takeId, topicId> pair into the database
 """
 def addTakeTopicMapping(db, takeId, topicId):
-    db.take_topic_mapping.insert(takeId = takeId, topicId = topicId)
+    if(not(checkIfTakeTopicMappingExists(db, takeId, topicId))):
+        db.take_topic_mapping.insert(takeId = takeId, topicId = topicId)
 
 
 """
@@ -212,6 +214,13 @@ This function removes a <takeId, topicId> pair present in the database
 def removeTakeTopicMapping(db, takeId, topicId):
     db((db.take_topic_mapping.takeId==takeId) & (db.take_topic_mapping.topicId==topicId)).delete()
 
+"""
+Given a list of userIds, the takes that have been posted by these guys is retrieved.
+"""
+def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db(db.takes.userId.belongs(userIdList)).select(limitby = limitby)
+    return rows
 
 """
 This function lets you either add a new take to the takes table.
