@@ -173,6 +173,7 @@ Delete the following:
 def deleteTake(db, takeId):
     db(db.takes.id==takeId).delete()
     db(db.take_topic_mapping.takeId==takeId).delete()
+    db((db.likes.articleId==takeId) & (db.likes.articleType=="Take")).delete()
 
 
 """
@@ -183,6 +184,7 @@ def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
     rows = db((db.take_topic_mapping.takeId==db.takes.id) & (db.take_topic_mapping.topicId == topicId)).select(limitby = limitby)
     return rows
 
+
 """
 Same as the previous function but sorting is done based on the number of likes.
 """
@@ -190,6 +192,16 @@ def getTopicTakesLikeSorted(db, topicId, rangeLowerLimit, rangeUpperLimit):
     query = "SELECT articleId, likes.userId AS userId, takeTitle, takeContent, timeOfTake, COUNT(articleId) AS likeCount FROM `likes` JOIN take_topic_mapping ON articleId=takeId JOIN takes ON takes.id = articleId where (articleType = 'Take' and topicId = "+str(topicId)+") GROUP BY articleId ORDER BY likeCount DESC"
     rows = db.executesql(query, as_dict =True)
     return rows
+
+
+"""
+Given a list of userIds, the takes that have been posted by these guys is retrieved.
+"""
+def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db(db.takes.userId.belongs(userIdList)).select(limitby = limitby)
+    return rows
+
 
 """
 Given a takeId and topicId, this function tells you if the mapping exists
@@ -199,6 +211,7 @@ def checkIfTakeTopicMappingExists(db, takeId, topicId):
     if(len(rows)==1):
         return True
     return False
+
 
 """
 This function adds a <takeId, topicId> pair into the database
@@ -214,13 +227,6 @@ This function removes a <takeId, topicId> pair present in the database
 def removeTakeTopicMapping(db, takeId, topicId):
     db((db.take_topic_mapping.takeId==takeId) & (db.take_topic_mapping.topicId==topicId)).delete()
 
-"""
-Given a list of userIds, the takes that have been posted by these guys is retrieved.
-"""
-def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
-    limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db(db.takes.userId.belongs(userIdList)).select(limitby = limitby)
-    return rows
 
 """
 This function lets you either add a new take to the takes table.
