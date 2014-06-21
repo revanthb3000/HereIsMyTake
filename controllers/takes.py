@@ -328,7 +328,8 @@ def echo():
     print request.vars
     userId = auth.user.id
     db = databaseQueries.getDBHandler(userId)
-    print databaseQueries.checkIfTakeTopicMappingExists(db, 1, 1)
+    print databaseQueries.getTopicTakesLikeSorted(db, 1, 0, 10)
+    print databaseQueries.getUserTakesLikeSorted(db, [2], 0, 20)
     return request.vars.name
 
 @auth.requires_login()

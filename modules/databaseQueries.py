@@ -189,9 +189,13 @@ def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
 Same as the previous function but sorting is done based on the number of likes.
 """
 def getTopicTakesLikeSorted(db, topicId, rangeLowerLimit, rangeUpperLimit):
-    query = "SELECT articleId, likes.userId AS userId, takeTitle, takeContent, timeOfTake, COUNT(articleId) AS likeCount FROM `likes` JOIN take_topic_mapping ON articleId=takeId JOIN takes ON takes.id = articleId where (articleType = 'Take' and topicId = "+str(topicId)+") GROUP BY articleId ORDER BY likeCount DESC"
-    rows = db.executesql(query, as_dict =True)
-    return rows
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    count = db.likes.articleId.count()
+    result = db((db.likes.articleType=="Take") & 
+                (db.take_topic_mapping.takeId==db.likes.articleId) & 
+                (db.take_topic_mapping.topicId == topicId)).select(db.likes.ALL, db.take_topic_mapping.ALL, count, 
+                                                                   groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
+    return result
 
 
 """
@@ -202,6 +206,17 @@ def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
     rows = db(db.takes.userId.belongs(userIdList)).select(limitby = limitby)
     return rows
 
+"""
+Same as the previous function but sorting is done based on the number of likes.
+"""
+def getUserTakesLikeSorted(db, userIdList, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    count = db.likes.articleId.count()
+    result = db((db.likes.articleType=="Take") & 
+                (db.takes.id==db.likes.articleId) & 
+                (db.takes.userId.belongs(userIdList))).select(db.likes.ALL, db.takes.ALL, count, 
+                groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
+    return result
 
 """
 Given a takeId and topicId, this function tells you if the mapping exists
