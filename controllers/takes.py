@@ -1,6 +1,7 @@
 """
 This is the takes.py controller and contains all controller functions related to the 'take' pages.
 """
+from datetime import timedelta
 
 # Stuff to get eclipse autocomplete to work. Dead code !
 if 0:
@@ -18,6 +19,7 @@ import databaseConnectionStrings
 import databaseQueries
 import utilityFunctions
 import MySQLdb
+import datetime
 
 def index():
     redirect(URL('default','index'))
@@ -34,7 +36,7 @@ def submitTake():
     db = databaseQueries.getDBHandler(auth.user.id)
 
     takeContent = ""
-    topicsList = databaseQueries.getListOfTopics(db)
+    topicsList = databaseQueries.getGlobalTopicsList(db)
     numOfTopics = len(topicsList)
 
     fields = []
@@ -75,10 +77,10 @@ def editTake():
 
     userId = auth.user.id
     takeId = request.vars.takeId
+    db = databaseQueries.getDBHandler(userId)
+    
     if not(utilityFunctions.isTakeIdValid(takeId)):
         redirect(URL('default','index'))
-
-    db = databaseQueries.getDBHandler(userId)
 
     if(not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
         redirect(URL('default','index'))
@@ -86,14 +88,14 @@ def editTake():
     db.takes.takeTitle.default = db.takes[takeId].takeTitle
     db.takes.takeContent.default = db.takes[takeId].takeContent
 
-    takeTopicsList = databaseQueries.getTakeTopicsList(db, takeId)
-    topicsList = databaseQueries.getListOfTopics(db)
+    topicMappings = databaseQueries.getTopicMappings(db, takeId)
+    topicsList = databaseQueries.getGlobalTopicsList(db)
     numOfTopics = len(topicsList)
 
     fields = []
     for i in range(1, numOfTopics):
         topicMapping = topicsList[i]
-        fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"], default = (i in takeTopicsList))]
+        fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"], default = (i in topicMappings))]
 
     fields += [field for field in db.takes]
     form = SQLFORM.factory(*fields)
@@ -213,45 +215,6 @@ def deleteTake():
     return dict(form = form, takeTitle = row.takeTitle)
 
 """
-The topic feed control. Given a topicId, this will give you the list of takes in paginated form.
-"""
-@auth.requires_login()
-def topicFeed():
-    response.view = "takes/topicFeed.html"
-    response.title = "Topic Feed"
-
-    topicId = request.vars.topicId
-    if not(utilityFunctions.checkIfVariableIsInt(topicId)):
-        redirect(URL('default','index'))
-    pageNumber = 0
-    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
-        pageNumber = int(request.vars.page)
-
-    items_per_page=5
-    rangeLowerLimit = pageNumber*items_per_page
-    rangeUpperLimit = (pageNumber+1)*items_per_page+1
-
-    nextUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber + 1))
-    previousUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber - 1))
-
-    db = databaseQueries.getDBHandler(auth.user.id)
-    rows = databaseQueries.getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit)
-    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)
-
-"""
-This is the subscription feed where you get the takes posted by the users you follow.
-"""
-@auth.requires_login()
-def subscriptionFeed():
-    userId = auth.user.id
-    db = databaseQueries.getDBHandler(userId)
-    userIdList = databaseQueries.getFollowedUsers(db, userId)
-    print userIdList
-    print databaseQueries.getUserTakes(db, userIdList, 0, 20)
-    print databaseQueries.getTopicTakesLikeSorted(db, 1, 0, 10)
-    return "Nothing"
-
-"""
 The comment controller. Adds a comment and then sends you back to the page you belong to.
 """
 @auth.requires_login()
@@ -322,6 +285,85 @@ def changeLikeStatus():
 
     redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
     return dict()
+
+
+"""
+The topic feed control. Given a topicId, this will give you the list of takes in paginated form.
+"""
+def topicFeed():
+    response.view = "takes/topicFeed.html"
+    response.title = "Topic Feed"
+    
+    topicId = request.vars.topicId
+    userId = (auth.user.id) if (auth.is_logged_in()) else 0
+    db = databaseQueries.getDBHandler(userId)
+
+
+    if not(utilityFunctions.checkIfVariableIsInt(topicId)):
+        redirect(URL('default','index'))
+
+    pageNumber = 0
+    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
+        pageNumber = int(request.vars.page)
+
+    items_per_page=10
+    rangeLowerLimit = pageNumber*items_per_page
+    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+
+    nextUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber + 1))
+    previousUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber - 1))
+    
+    #Example of getting articles in the last week
+    toDate = datetime.datetime.now()
+    fromDate = datetime.datetime.now() - datetime.timedelta(days=50)
+    rows = databaseQueries.getTopicTakes(db, topicId,fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+
+    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)
+
+
+"""
+This covers everything ! All takes. No topics.
+"""
+def generalFeed():
+    response.view = "takes/generalFeed.html"
+    response.title = "Take Feed"
+
+    userId = (auth.user.id) if (auth.is_logged_in()) else 0
+    db = databaseQueries.getDBHandler(userId)
+
+    pageNumber = 0
+    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
+        pageNumber = int(request.vars.page)
+
+    items_per_page=10
+    rangeLowerLimit = pageNumber*items_per_page
+    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+
+    nextUrl = URL('takes','generalFeed',vars=dict(page = pageNumber + 1))
+    previousUrl = URL('takes','generalFeed',vars=dict(page = pageNumber - 1))
+    
+    #Example of getting articles in the last week
+    toDate = datetime.datetime.now()
+    fromDate = datetime.datetime.now() - datetime.timedelta(days=30)
+    rows = databaseQueries.getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+
+    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)
+
+"""
+This is the subscription feed where you get the takes posted by the users you follow.
+"""
+@auth.requires_login()
+def subscriptionFeed():
+    userId = auth.user.id
+    db = databaseQueries.getDBHandler(userId)
+    userIdList = databaseQueries.getFollowedUsers(db, userId)
+    print userIdList
+    #Example of getting articles in the last week
+    toDate = datetime.datetime.now()
+    fromDate = datetime.datetime.now() - datetime.timedelta(days=7)
+    print databaseQueries.getUserTakes(db, userIdList,fromDate, toDate, 0, 20)
+    print databaseQueries.getTopicTakesLikeSorted(db, 1,fromDate, toDate, 0, 10)
+    return "Nothing"
 
 
 def echo():

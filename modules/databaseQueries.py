@@ -136,7 +136,7 @@ Basic function that gets the list of topics. Useful when classifying a take.
 The list returned, contains objects of the form:
 Dictionary : {"topicName": "Anime", "parentId": 5}
 """
-def getListOfTopics(db):
+def getGlobalTopicsList(db):
     rows = db(db.topics).select()
     #TopicName, parentId tuple. I'll be able to get topicId from the list index.
     topicMapping = {}
@@ -151,97 +151,6 @@ def getListOfTopics(db):
         topicMapping["parentId"] = int(row.parentId)
         topicsList.append(topicMapping)
     return topicsList
-
-
-"""
-Given a takeId, this guy returns all the topics that have been tagged to it.
-"""
-def getTakeTopicsList(db, takeId):
-    rows = db(db.take_topic_mapping.takeId==takeId).select()
-    topics = []
-    for row in rows:
-        topics.append(row.topicId)
-    return topics
-
-
-"""
-Given a takeId, this function gets rid of everything related to that take.
-Delete the following:
-1) Take info from the takes table.
-2) Take topic mapping from the take_topic_mapping table.
-"""
-def deleteTake(db, takeId):
-    db(db.takes.id==takeId).delete()
-    db(db.take_topic_mapping.takeId==takeId).delete()
-    db((db.likes.articleId==takeId) & (db.likes.articleType=="Take")).delete()
-
-
-"""
-Given a topicId, this function will return all takes that fall under that category
-"""
-def getTopicTakes(db, topicId, rangeLowerLimit, rangeUpperLimit):
-    limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db((db.take_topic_mapping.takeId==db.takes.id) & (db.take_topic_mapping.topicId == topicId)).select(limitby = limitby)
-    return rows
-
-
-"""
-Same as the previous function but sorting is done based on the number of likes.
-"""
-def getTopicTakesLikeSorted(db, topicId, rangeLowerLimit, rangeUpperLimit):
-    limitby=(rangeLowerLimit,rangeUpperLimit)
-    count = db.likes.articleId.count()
-    result = db((db.likes.articleType=="Take") & 
-                (db.take_topic_mapping.takeId==db.likes.articleId) & 
-                (db.take_topic_mapping.topicId == topicId)).select(db.likes.ALL, db.take_topic_mapping.ALL, count, 
-                                                                   groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
-    return result
-
-
-"""
-Given a list of userIds, the takes that have been posted by these guys is retrieved.
-"""
-def getUserTakes(db, userIdList, rangeLowerLimit, rangeUpperLimit):
-    limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db(db.takes.userId.belongs(userIdList)).select(limitby = limitby)
-    return rows
-
-"""
-Same as the previous function but sorting is done based on the number of likes.
-"""
-def getUserTakesLikeSorted(db, userIdList, rangeLowerLimit, rangeUpperLimit):
-    limitby=(rangeLowerLimit,rangeUpperLimit)
-    count = db.likes.articleId.count()
-    result = db((db.likes.articleType=="Take") & 
-                (db.takes.id==db.likes.articleId) & 
-                (db.takes.userId.belongs(userIdList))).select(db.likes.ALL, db.takes.ALL, count, 
-                groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
-    return result
-
-"""
-Given a takeId and topicId, this function tells you if the mapping exists
-"""
-def checkIfTakeTopicMappingExists(db, takeId, topicId):
-    rows = db((db.take_topic_mapping.topicId==topicId) & (db.take_topic_mapping.takeId==takeId)).select()
-    if(len(rows)==1):
-        return True
-    return False
-
-
-"""
-This function adds a <takeId, topicId> pair into the database
-"""
-def addTakeTopicMapping(db, takeId, topicId):
-    if(not(checkIfTakeTopicMappingExists(db, takeId, topicId))):
-        db.take_topic_mapping.insert(takeId = takeId, topicId = topicId)
-
-
-"""
-This function removes a <takeId, topicId> pair present in the database
-"""
-def removeTakeTopicMapping(db, takeId, topicId):
-    db((db.take_topic_mapping.takeId==takeId) & (db.take_topic_mapping.topicId==topicId)).delete()
-
 
 """
 This function lets you either add a new take to the takes table.
@@ -270,6 +179,132 @@ def getTakeInfo(db, takeId):
     if len(rows) == 1:
         row = rows[0]
     return row
+
+"""
+Given a takeId, this function gets rid of everything related to that take.
+Delete the following:
+1) Take info from the takes table.
+2) Take topic mapping from the take_topic_mapping table.
+"""
+def deleteTake(db, takeId):
+    db(db.takes.id==takeId).delete()
+    db(db.take_topic_mapping.takeId==takeId).delete()
+    db((db.likes.articleId==takeId) & (db.likes.articleType=="Take")).delete()
+
+
+"""
+This function will retrieve all takes in the DB sorted by date.
+"""
+def getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db((db.takes.timeOfTake >= fromDate) & 
+              (db.takes.timeOfTake <= toDate)).select(db.takes.ALL, limitby = limitby, orderby = ~db.takes.timeOfTake)
+    return rows
+
+
+"""
+Same as the above but sorts according to likes.
+"""
+def getAllTakesSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    count = db.likes.articleId.count()
+    result = db((db.likes.articleType=="Take") &  
+                (db.takes.timeOfTake >= fromDate) & 
+                (db.takes.timeOfTake <= toDate)).select(
+                db.likes.ALL, count, 
+                groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
+    return result
+
+
+"""
+Given a topicId, this function will return all takes that fall under that category
+"""
+def getTopicTakes(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db((db.take_topic_mapping.takeId==db.takes.id) & 
+              (db.take_topic_mapping.topicId == topicId) & 
+              (db.takes.timeOfTake >= fromDate) & 
+              (db.takes.timeOfTake <= toDate)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
+    return rows
+
+
+"""
+Same as the previous function but sorting is done based on the number of likes.
+"""
+def getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    count = db.likes.articleId.count()
+    result = db((db.likes.articleType=="Take") & 
+                (db.take_topic_mapping.takeId==db.likes.articleId) & 
+                (db.take_topic_mapping.topicId == topicId) & 
+                (db.takes.timeOfTake >= fromDate) & 
+                (db.takes.timeOfTake <= toDate)).select(
+                db.likes.ALL, db.take_topic_mapping.ALL, count, 
+                groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
+    return result
+
+
+"""
+Given a list of userIds, the takes that have been posted by these guys is retrieved.
+"""
+def getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db(db.takes.userId.belongs(userIdList) & 
+             (db.takes.timeOfTake >= fromDate) & 
+             (db.takes.timeOfTake <= toDate)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
+    return rows
+
+"""
+Same as the previous function but sorting is done based on the number of likes.
+"""
+def getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    count = db.likes.articleId.count()
+    result = db((db.likes.articleType=="Take") & 
+                (db.takes.id==db.likes.articleId) & 
+                (db.takes.userId.belongs(userIdList)) & 
+                (db.takes.timeOfTake >= fromDate) & 
+                (db.takes.timeOfTake <= toDate)).select(
+                db.likes.ALL, db.takes.ALL, count, 
+                groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
+    return result
+
+
+"""
+This function adds a <takeId, topicId> pair into the database
+"""
+def addTakeTopicMapping(db, takeId, topicId):
+    if(not(checkIfTakeTopicMappingExists(db, takeId, topicId))):
+        db.take_topic_mapping.insert(takeId = takeId, topicId = topicId)
+
+
+"""
+This function removes a <takeId, topicId> pair present in the database
+"""
+def removeTakeTopicMapping(db, takeId, topicId):
+    db((db.take_topic_mapping.takeId==takeId) & (db.take_topic_mapping.topicId==topicId)).delete()
+
+
+"""
+Given a takeId and topicId, this function tells you if the mapping exists
+"""
+def checkIfTakeTopicMappingExists(db, takeId, topicId):
+    rows = db((db.take_topic_mapping.topicId==topicId) & (db.take_topic_mapping.takeId==takeId)).select()
+    if(len(rows)==1):
+        return True
+    return False
+
+
+"""
+Given a takeId, this guy returns all the topics that have been tagged to it.
+"""
+def getTopicMappings(db, takeId):
+    rows = db(db.take_topic_mapping.takeId==takeId).select()
+    topics = []
+    for row in rows:
+        topics.append(row.topicId)
+    return topics
+
 
 """
 This function adds a comment to the comments table.
