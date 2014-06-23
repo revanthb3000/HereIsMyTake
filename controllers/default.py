@@ -16,7 +16,7 @@ import MySQLdb
 
 def index():
     response.view = "default/index.html"
-    sampleNewsFeedURL = URL('takes','topicFeed',vars=dict(topicId='1'))
+    sampleNewsFeedURL = URL('takes','generalFeed')
     if(auth.is_logged_in()):
         redirect(URL('takes','tiles'))
     return dict(sampleNewsFeedURL = sampleNewsFeedURL)

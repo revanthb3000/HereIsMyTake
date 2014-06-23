@@ -37,14 +37,14 @@ def _():
     response.menu += [
         (SPAN('Takes', _class='highlighted'), False, '', [
         (T('Submit Take'), False, URL('takes','submitTake')),
-        (T('View Take'), False, URL('takes','viewTake')),
-        (T('Plugins'), False, None, [
-                        ('plugin_wiki', False,
-                         'http://web2py.com/examples/default/download'),
-                        (T('Other Plugins'), False,
-                         'http://web2py.com/plugins'),
-                        (T('Layout Plugins'),
-                         False, 'http://web2py.com/layouts'),
+        (T('General Feed'), False, URL('takes','generalFeed')),
+        (T('Topic Feed'), False, None, [
+                        ('Entertainment', False,
+                         URL('takes','topicFeed',vars=dict(topicId='1'))),
+                        (T('Sports'), False,
+                         URL('takes','topicFeed',vars=dict(topicId='6'))),
+                        (T('Revanth :P'),
+                         False, URL('takes','subscriptionFeed')),
                         ])
                 ]
          )]
