@@ -50,7 +50,7 @@ def profile():
         else:
             followURL = URL('users','follow',vars=dict(userId = userId))
 
-    profilePicLink = databaseQueries.getUserProfilePicture(db, userId)
+    profilePicLink = databaseQueries.getUserProfilePicture(db, userId, None)
     return dict(profilePicLink = profilePicLink , userInfo = row, followURL = followURL, isFollowing = isFollowing)
 
 @auth.requires_login()

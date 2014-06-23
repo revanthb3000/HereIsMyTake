@@ -38,6 +38,7 @@ def _():
         (SPAN('Takes', _class='highlighted'), False, '', [
         (T('Submit Take'), False, URL('takes','submitTake')),
         (T('General Feed'), False, URL('takes','generalFeed')),
+        (T('Subscription Feed'), False, URL('takes','subscriptionFeed')),
         (T('Topic Feed'), False, None, [
                         ('Entertainment', False,
                          URL('takes','topicFeed',vars=dict(topicId='1'))),

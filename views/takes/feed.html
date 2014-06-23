@@ -1,9 +1,29 @@
 {{extend 'layout.html'}}
+{{import databaseQueries}}
 
+<table>
 {{for i,row in enumerate(rows):}}
-{{if i==items_per_page: break}}
-<a href="{{=URL('takes','viewTake',vars=dict(takeId=row.takes.id))}}">{{=row.takes.takeTitle}}</a><br/>
+	{{if i==items_per_page: break}}
+	<tr>
+		<td>
+			<a href="{{=URL('users','profile',vars=dict(userId = row.auth_user.id))}}">
+					{{
+						displayPicture = ""
+						if (row.auth_user.displayPicture!=None):
+							displayPicture = row.auth_user.displayPicture
+							pass
+					}}
+					{{=IMG(_src=databaseQueries.getUserProfilePicture(None, row.auth_user.id, displayPicture), 
+						_alt=row.auth_user.first_name + " " + row.auth_user.last_name,_width="75px",_height="75px")}}
+			</a>
+		</td>
+		<td>
+			<a href="{{=URL('takes','viewTake',vars=dict(takeId=row.takes.id))}}">{{=row.takes.takeTitle}}</a>
+			<br/>
+		</td>
+	</tr>
 {{pass}}
+</table>
 
 <br/>
 {{if page:}}

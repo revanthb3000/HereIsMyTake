@@ -170,7 +170,7 @@ def viewTake():
     
     
     isFollowing = databaseQueries.checkIfFollowing(db,authorUserId,userId)
-    profilePicLink = databaseQueries.getUserProfilePicture(db, authorUserId)
+    profilePicLink = databaseQueries.getUserProfilePicture(db, authorUserId, None)
     
     return dict(takeId = takeId, takeContent = row.takeContent, numberOfLikes = numberOfLikes,
                 editLink = editLink, deleteLink = deleteLink, isTakeLiked = isTakeLiked,
@@ -354,17 +354,29 @@ This is the subscription feed where you get the takes posted by the users you fo
 """
 @auth.requires_login()
 def subscriptionFeed():
-    userId = auth.user.id
+    response.view = "takes/feed.html"
+    response.title = "Subscription Feed"
+
+    userId = (auth.user.id) if (auth.is_logged_in()) else 0
     db = databaseQueries.getDBHandler(userId)
     userIdList = databaseQueries.getFollowedUsers(db, userId)
-    print userIdList
+
+    pageNumber = 0
+    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
+        pageNumber = int(request.vars.page)
+
+    items_per_page=10
+    rangeLowerLimit = pageNumber*items_per_page
+    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+
+    nextUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber + 1))
+    previousUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber - 1))
+    
     #Example of getting articles in the last week
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(days=7)
-    print databaseQueries.getUserTakes(db, userIdList,fromDate, toDate, 0, 20)
-    print databaseQueries.getTopicTakesLikeSorted(db, 1,fromDate, toDate, 0, 10)
-    return "Nothing"
-
+    fromDate = datetime.datetime.now() - datetime.timedelta(days=30)
+    rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl)    
 
 def echo():
     print request.vars

@@ -76,15 +76,20 @@ def checkIfUserExists(db, userId):
 """
 Given a userId, this function will return the user's profile picture link
 """
-def getUserProfilePicture(db, userId):
-    rows = db(db.auth_user.id == userId).select()
-    link =""
+def getUserProfilePicture(db, userId, displayPicture):
     fileName = "images/displayPictures/defaultMale.png"
-    row = None
-    if len(rows) == 1:
-        row = rows[0]
-        if (row.displayPicture!=None and row.displayPicture.strip()!=""):
-            fileName = row.displayPicture
+    if (displayPicture!=None and displayPicture.strip()!=""):
+        fileName = displayPicture
+
+    if(displayPicture == None):
+        rows = db(db.auth_user.id == userId).select()
+        link =""
+        row = None
+        if len(rows) == 1:
+            row = rows[0]
+            if (row.displayPicture!=None and row.displayPicture.strip()!=""):
+                fileName = row.displayPicture
+
     if("defaultMale.png" in fileName):
         link = URL('static', fileName)
     else:
