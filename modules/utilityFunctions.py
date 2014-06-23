@@ -3,6 +3,7 @@
 from gluon import *
 import os
 import databaseQueries
+import re
 
 def checkIfVariableIsInt(var):
     try:
@@ -20,3 +21,11 @@ def isTakeIdValid(takeId):
     if row == None:
         return False
     return True
+
+def getArticlePreview(articleSource):
+    articleSource.replace("<br/>","$$##$$")
+    articleSource.replace("<br>","$$##$$")
+    articleSource = re.sub('<[^<]+?>', ' ', articleSource)
+    articleSource = articleSource[:500] + "......"
+    preview = articleSource.replace("$$##$$","<br/>")
+    return preview

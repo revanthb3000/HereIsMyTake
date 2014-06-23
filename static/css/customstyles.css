@@ -10,3 +10,8 @@
 	display: inline;
 	color: #21610B;
 }
+
+tr.feedRow > td
+{
+  padding-bottom: 2em;
+}
