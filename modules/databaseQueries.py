@@ -198,7 +198,8 @@ This function will retrieve all takes in the DB sorted by date.
 def getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     rows = db((db.takes.timeOfTake >= fromDate) & 
-              (db.takes.timeOfTake <= toDate)).select(db.takes.ALL, limitby = limitby, orderby = ~db.takes.timeOfTake)
+              (db.takes.timeOfTake <= toDate) &
+              (db.takes.userId == db.auth_user.id)).select(db.takes.ALL, db.auth_user.ALL, limitby = limitby, orderby = ~db.takes.timeOfTake)
     return rows
 
 
@@ -210,8 +211,9 @@ def getAllTakesSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
     count = db.likes.articleId.count()
     result = db((db.likes.articleType=="Take") &  
                 (db.takes.timeOfTake >= fromDate) & 
-                (db.takes.timeOfTake <= toDate)).select(
-                db.likes.ALL, count, 
+                (db.takes.timeOfTake <= toDate) &
+                (db.takes.userId == db.auth_user.id)).select(
+                db.likes.ALL, db.auth_user.ALL, count, 
                 groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
     return result
 
@@ -224,7 +226,8 @@ def getTopicTakes(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimi
     rows = db((db.take_topic_mapping.takeId==db.takes.id) & 
               (db.take_topic_mapping.topicId == topicId) & 
               (db.takes.timeOfTake >= fromDate) & 
-              (db.takes.timeOfTake <= toDate)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
+              (db.takes.timeOfTake <= toDate) &
+              (db.takes.userId == db.auth_user.id)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
     return rows
 
 
@@ -238,8 +241,9 @@ def getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rang
                 (db.take_topic_mapping.takeId==db.likes.articleId) & 
                 (db.take_topic_mapping.topicId == topicId) & 
                 (db.takes.timeOfTake >= fromDate) & 
-                (db.takes.timeOfTake <= toDate)).select(
-                db.likes.ALL, db.take_topic_mapping.ALL, count, 
+                (db.takes.timeOfTake <= toDate) &
+                (db.takes.userId == db.auth_user.id)).select(
+                db.likes.ALL, db.take_topic_mapping.ALL, db.auth_user.ALL, count, 
                 groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
     return result
 
@@ -251,7 +255,8 @@ def getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLi
     limitby=(rangeLowerLimit,rangeUpperLimit)
     rows = db(db.takes.userId.belongs(userIdList) & 
              (db.takes.timeOfTake >= fromDate) & 
-             (db.takes.timeOfTake <= toDate)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
+             (db.takes.timeOfTake <= toDate) &
+             (db.takes.userId == db.auth_user.id)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
     return rows
 
 """
@@ -264,8 +269,9 @@ def getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, ra
                 (db.takes.id==db.likes.articleId) & 
                 (db.takes.userId.belongs(userIdList)) & 
                 (db.takes.timeOfTake >= fromDate) & 
-                (db.takes.timeOfTake <= toDate)).select(
-                db.likes.ALL, db.takes.ALL, count, 
+                (db.takes.timeOfTake <= toDate) &
+                (db.takes.userId == db.auth_user.id)).select(
+                db.likes.ALL, db.takes.ALL, db.auth_user.ALL, count, 
                 groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
     return result
 

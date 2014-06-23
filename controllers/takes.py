@@ -291,7 +291,7 @@ def changeLikeStatus():
 The topic feed control. Given a topicId, this will give you the list of takes in paginated form.
 """
 def topicFeed():
-    response.view = "takes/topicFeed.html"
+    response.view = "takes/feed.html"
     response.title = "Topic Feed"
     
     topicId = request.vars.topicId
@@ -325,7 +325,7 @@ def topicFeed():
 This covers everything ! All takes. No topics.
 """
 def generalFeed():
-    response.view = "takes/generalFeed.html"
+    response.view = "takes/feed.html"
     response.title = "Take Feed"
 
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
@@ -376,5 +376,5 @@ def echo():
 
 @auth.requires_login()
 def tiles():
-    redirect(URL('takes','topicFeed',vars=dict(topicId='1')))
+    redirect(URL('takes','generalFeed'))
     return dict()
