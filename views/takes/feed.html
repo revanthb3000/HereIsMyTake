@@ -7,6 +7,18 @@
     db = databaseQueries.getDBHandler(userId)
 }}
 
+<a href="{{=alternateSortURL}}">
+	{{
+		if ("Date" in alternateSortURL):
+			="Sort by Date"
+		else:
+			="Sort by Likes"
+		pass
+	}}
+</a>
+<br/>
+<br/>
+<br/>
 <table>
 {{for i,row in enumerate(rows):}}
 	{{if i==items_per_page: break}}

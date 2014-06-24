@@ -214,11 +214,12 @@ Same as the above but sorts according to likes.
 def getAllTakesSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     count = db.likes.articleId.count()
-    result = db((db.likes.articleType=="Take") &  
+    result = db((db.likes.articleType=="Take") &
+                (db.takes.id == db.likes.articleId) &  
                 (db.takes.timeOfTake >= fromDate) & 
                 (db.takes.timeOfTake <= toDate) &
                 (db.takes.userId == db.auth_user.id)).select(
-                db.likes.ALL, db.auth_user.ALL, count, 
+                db.likes.ALL, db.auth_user.ALL, db.takes.ALL, count, 
                 groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
     return result
 
@@ -245,10 +246,11 @@ def getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rang
     result = db((db.likes.articleType=="Take") & 
                 (db.take_topic_mapping.takeId==db.likes.articleId) & 
                 (db.take_topic_mapping.topicId == topicId) & 
+                (db.takes.id == db.likes.articleId) &  
                 (db.takes.timeOfTake >= fromDate) & 
                 (db.takes.timeOfTake <= toDate) &
                 (db.takes.userId == db.auth_user.id)).select(
-                db.likes.ALL, db.take_topic_mapping.ALL, db.auth_user.ALL, count, 
+                db.likes.ALL, db.take_topic_mapping.ALL, db.auth_user.ALL, db.takes.ALL, count, 
                 groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
     return result
 
@@ -271,12 +273,12 @@ def getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, ra
     limitby=(rangeLowerLimit,rangeUpperLimit)
     count = db.likes.articleId.count()
     result = db((db.likes.articleType=="Take") & 
-                (db.takes.id==db.likes.articleId) & 
+                (db.takes.id == db.likes.articleId) &  
                 (db.takes.userId.belongs(userIdList)) & 
                 (db.takes.timeOfTake >= fromDate) & 
                 (db.takes.timeOfTake <= toDate) &
                 (db.takes.userId == db.auth_user.id)).select(
-                db.likes.ALL, db.takes.ALL, db.auth_user.ALL, count, 
+                db.likes.ALL, db.takes.ALL, db.auth_user.ALL,  db.takes.ALL, count, 
                 groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
     return result
 
