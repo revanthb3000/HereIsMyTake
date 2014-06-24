@@ -365,7 +365,7 @@ def generalFeed():
     fromDate = datetime.datetime.now() - datetime.timedelta(days=30)
     
     if(sortParameter!="Date"):
-        rows = databaseQueries.getAllTakesSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+        rows = databaseQueries.getAllTakesLikeSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Date"))
     else:
         rows = databaseQueries.getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)

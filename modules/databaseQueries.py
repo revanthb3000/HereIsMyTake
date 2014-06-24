@@ -211,7 +211,7 @@ def getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
 """
 Same as the above but sorts according to likes.
 """
-def getAllTakesSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getAllTakesLikeSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     count = db.likes.articleId.count()
     result = db((db.likes.articleType=="Take") &
