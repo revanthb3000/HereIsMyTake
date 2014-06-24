@@ -62,7 +62,6 @@ def submitTake():
         response.flash = 'Please fill the form.'
 
     textarea = form.element('textarea')
-    textarea['_cols'] = 1000
     return dict(form=form, takeContent = takeContent)
 
 """
@@ -116,7 +115,6 @@ def editTake():
         response.flash = 'Please fill the form.'
 
     textarea = form.element('textarea')
-    textarea['_cols'] = 1000
     return dict(form=form, takeContent = takeContent)
 
 """
