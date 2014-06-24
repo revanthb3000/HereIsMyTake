@@ -3,34 +3,16 @@ This module will contain all DB functions starting from creating a DB handler to
 """
 
 from gluon import *
-import databaseConnectionStrings
 import datetime
 
 """
-This function generates a db handler and returns it to you. Remember that it is your responsibility to close the db handle once you're done using it.
-Important point is to send None as the userId in case you're calling this function in a page where the user need not be logged in.
-
-Here's a snippet that can be used :
-
-userId = (auth.user.id) if (auth.is_logged_in()) else 0
-db = databaseQueries.getDBHandler(userId)
-
+Define all your tables over here. This function is called in db.py
 """
-def getDBHandler(userId):
-    db = DAL(databaseConnectionStrings.connectionString, migrate=False)
-
+def defineDBTables(db, userId):
     if(userId==None):
         userId = 0
 
     #Add all define_table statements in here.
-    db.define_table("auth_user",
-                        Field("id","integer"), Field("first_name", "string", requires=IS_NOT_EMPTY()),
-                        Field("last_name", "string", requires=IS_NOT_EMPTY()),Field("email", "string", requires=IS_NOT_EMPTY()),
-                        Field('Education','string'), Field('Occupation','string'), Field('Birthday','date'),
-                        Field('AboutMe','text'), Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other'])),
-                        Field('displayPicture', 'upload' ),Field('Website','string')
-                    )
-
     db.define_table("topics",
                         Field("id","integer"), Field("topicName","string"), Field("parentId","integer")
                     )
@@ -61,8 +43,6 @@ def getDBHandler(userId):
                         Field("articleType",'string',requires = IS_IN_SET(['Take', 'Comment'])),
                         Field("timeOfLike","datetime",writable = False,readable = False)
                     )
-    return db
-
 
 """
 Given a userId, this function will tell you if that user actually exists.

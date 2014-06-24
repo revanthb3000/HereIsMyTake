@@ -12,8 +12,7 @@ def checkIfVariableIsInt(var):
         return False
     return True
 
-def isTakeIdValid(takeId):
-    db = databaseQueries.getDBHandler(0)
+def isTakeIdValid(takeId, db):
     if not(checkIfVariableIsInt(takeId)):
         return False
 

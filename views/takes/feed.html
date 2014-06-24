@@ -15,12 +15,6 @@
 </a>
 {{end}}
 
-
-{{
-    userId = (auth.user.id) if (auth.is_logged_in()) else 0
-    db = databaseQueries.getDBHandler(userId)
-}}
-
 <table>
 {{
 	for i,row in enumerate(rows):

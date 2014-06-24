@@ -40,11 +40,6 @@
 	{{pass}}
 {{end}}
 
-{{
-    userId = (auth.user.id) if (auth.is_logged_in()) else 0
-    db = databaseQueries.getDBHandler(userId)
-}}
-
 {{=XML(takeContent)}}
 <br/>
 <br/>

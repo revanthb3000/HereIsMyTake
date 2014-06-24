@@ -1,4 +1,5 @@
 import databaseConnectionStrings
+import databaseQueries
 
 # -*- coding: utf-8 -*-
 
@@ -45,13 +46,9 @@ response.generic_patterns = ['*'] if request.is_local else []
 from gluon.tools import Auth, Crud, Service, PluginManager, prettydate
 auth = Auth(db)
 auth.settings.extra_fields['auth_user']= [
-    Field('Birthday','date'),
-    Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other']))
-#   Field('Education','string'),
-#   Field('Occupation','string'),
-#   Field('AboutMe','text'),
-#   Field('displayPicture', 'upload' ),
-#   Field('Website','string')
+    Field('Education','string'), Field('Occupation','string'), Field('Birthday','date'),                    
+    Field('AboutMe','text'), Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other'])),
+    Field('displayPicture', 'upload' ),Field('Website','string')
 ]
 crud, service, plugins = Crud(db), Service(), PluginManager()
 
@@ -77,22 +74,9 @@ auth.settings.reset_password_requires_verification = True
 from gluon.contrib.login_methods.rpx_account import use_janrain
 use_janrain(auth, filename='private/janrain.key')
 
-#########################################################################
-## Define your tables below (or better in another model file) for example
-##
-## >>> db.define_table('mytable',Field('myfield','string'))
-##
-## Fields can be 'string','text','password','integer','double','boolean'
-##       'date','time','datetime','blob','upload', 'reference TABLENAME'
-## There is an implicit 'id integer autoincrement' field
-## Consult manual for more options, validators, etc.
-##
-## More API examples for controllers:
-##
-## >>> db.mytable.insert(myfield='value')
-## >>> rows=db(db.mytable.myfield=='value').select(db.mytable.ALL)
-## >>> for row in rows: print row.id, row.myfield
-#########################################################################
+userId = (auth.user.id) if (auth.is_logged_in()) else 0
+databaseQueries.defineDBTables(db, userId)
+
 
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)

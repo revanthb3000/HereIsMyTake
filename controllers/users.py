@@ -32,7 +32,7 @@ def profile():
 
     response.view = 'users/profile.html'
 
-    db = databaseQueries.getDBHandler(userId)
+
     isFollowing = databaseQueries.checkIfFollowing(db,userId,auth.user.id)
 
     rows = db(db.auth_user.id == userId).select()
@@ -67,7 +67,6 @@ def editDisplayPicture():
 def editProfile():
     response.view = "users/editprofile.html"
     response.title = 'Editing Profile'
-    db = databaseQueries.getDBHandler(auth.user.id)
 
     form=SQLFORM(db.auth_user, auth.user.id, showid = False)
     if form.process().accepted:
@@ -77,6 +76,7 @@ def editProfile():
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
+    
     return dict(form=form, username = auth.user.first_name + " " + auth.user.last_name)
 
 @auth.requires_login()
@@ -85,13 +85,12 @@ def follow():
         redirect(URL('default','index'))
 
     userId = request.vars.userId
-    db = databaseQueries.getDBHandler(auth.user.id)
     if (databaseQueries.checkIfUserExists(db,userId)):
         db.followRelations.insert(userId=userId,followerId=auth.user.id)
         redirect(URL('users','profile',vars=dict(userId = userId)))
     else:
         redirect(URL('default','index'))
-
+    
     return dict()
 
 @auth.requires_login()
@@ -100,7 +99,6 @@ def unfollow():
         redirect(URL('default','index'))
 
     userId = request.vars.userId
-    db = databaseQueries.getDBHandler(auth.user.id)
     if (databaseQueries.checkIfUserExists(db,userId)):
         db((db.followRelations.userId==userId) & (db.followRelations.followerId==auth.user.id)).delete()
         redirect(URL('users','profile',vars=dict(userId = userId)))

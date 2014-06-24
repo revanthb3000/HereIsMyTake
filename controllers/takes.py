@@ -33,7 +33,6 @@ A rich text editor is provided and you get to select tags and submit the take co
 def submitTake():
     response.view = "takes/submitTake.html"
     response.title = "Submit Take"
-    db = databaseQueries.getDBHandler(auth.user.id)
 
     takeContent = ""
     topicsList = databaseQueries.getGlobalTopicsList(db)
@@ -77,9 +76,9 @@ def editTake():
 
     userId = auth.user.id
     takeId = request.vars.takeId
-    db = databaseQueries.getDBHandler(userId)
+
     
-    if not(utilityFunctions.isTakeIdValid(takeId)):
+    if not(utilityFunctions.isTakeIdValid(takeId,db)):
         redirect(URL('default','index'))
 
     if(not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
@@ -128,11 +127,11 @@ def viewTake():
     response.view = 'takes/viewTake.html'
 
     takeId = request.vars.takeId
-    if not(utilityFunctions.isTakeIdValid(takeId)):
+    if not(utilityFunctions.isTakeIdValid(takeId,db)):
         redirect(URL('default','index'))
 
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
-    db = databaseQueries.getDBHandler(userId)
+
 
     row = databaseQueries.getTakeInfo(db, takeId)
     authorUserId = row.userId
@@ -171,7 +170,7 @@ def viewTake():
     authorNumberOfFollowers = databaseQueries.getNumberOfFollowers(db, authorUserId)
     authorName = databaseQueries.getUserName(db, authorUserId)
     profilePicLink = databaseQueries.getUserProfilePicture(db, authorUserId, None)
-    
+
     return dict(takeId = takeId, takeContent = row.takeContent, numberOfLikes = numberOfLikes,
                 editLink = editLink, deleteLink = deleteLink, isTakeLiked = isTakeLiked,
                 form = form, comments = commentRows, isCommentLiked = isCommentLiked, 
@@ -190,10 +189,8 @@ def deleteTake():
 
     userId = auth.user.id
     takeId = request.vars.takeId
-    if not(utilityFunctions.isTakeIdValid(takeId)):
+    if not(utilityFunctions.isTakeIdValid(takeId,db)):
         redirect(URL('default','index'))
-
-    db = databaseQueries.getDBHandler(userId)
 
     if(not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
         redirect(URL('default','index'))
@@ -221,11 +218,11 @@ The comment controller. Adds a comment and then sends you back to the page you b
 @auth.requires_login()
 def postComment():
     userId = auth.user.id
-    db = databaseQueries.getDBHandler(userId)
+
 
     takeId = request.vars.takeId
     commentContent = request.vars.commentContent
-    if((commentContent == None) or (commentContent.strip()=="") or (not(utilityFunctions.isTakeIdValid(takeId)))):
+    if((commentContent == None) or (commentContent.strip()=="") or (not(utilityFunctions.isTakeIdValid(takeId,db)))):
         redirect(URL('default','index'))
 
     databaseQueries.addComment(db, takeId, request.vars.commentContent)
@@ -238,12 +235,12 @@ This controller lets you delete a comment.
 @auth.requires_login()
 def deleteComment():
     userId = auth.user.id
-    db = databaseQueries.getDBHandler(userId)
+
 
     commentId = request.vars.commentId
     takeId = request.vars.takeId
 
-    if not(utilityFunctions.isTakeIdValid(takeId)):
+    if not(utilityFunctions.isTakeIdValid(takeId,db)):
         redirect(URL('default','index'))
 
     if not(utilityFunctions.checkIfVariableIsInt(commentId)):
@@ -264,7 +261,7 @@ If you call it when the user hasn't liked the article, its liked.
 @auth.requires_login()
 def changeLikeStatus():
     userId = auth.user.id
-    db = databaseQueries.getDBHandler(userId)
+
     articleType = request.vars.articleType
     articleId = request.vars.articleId
 
@@ -297,7 +294,7 @@ def topicFeed():
     
     topicId = request.vars.topicId
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
-    db = databaseQueries.getDBHandler(userId)
+
 
     sortParameter = "Date"
     if(request.vars.sortParameter!=None):
@@ -342,7 +339,7 @@ def generalFeed():
     response.title = "Take Feed"
 
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
-    db = databaseQueries.getDBHandler(userId)
+
     
     sortParameter = "Date"
     if(request.vars.sortParameter!=None):
@@ -382,7 +379,7 @@ def subscriptionFeed():
     response.title = "Subscription Feed"
 
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
-    db = databaseQueries.getDBHandler(userId)
+
     userIdList = databaseQueries.getFollowedUsers(db, userId)
 
     sortParameter = "Date"
@@ -418,7 +415,7 @@ def subscriptionFeed():
 def echo():
     print request.vars
     userId = auth.user.id
-    db = databaseQueries.getDBHandler(userId)
+
     print databaseQueries.getTopicTakesLikeSorted(db, 1, 0, 10)
     print databaseQueries.getUserTakesLikeSorted(db, [2], 0, 20)
     return request.vars.name
