@@ -5,7 +5,8 @@
 {{block right_sidebar}}
 {{=IMG(_src=profilePicLink, _alt="DP",_width="200px",_height="200px")}}
 <br/>
-
+<i>{{=numberOfFollowers}} Follower{{="s" if (numberOfFollowers!=1) else ""}}</i>
+<br/>
 {{
 if (followURL!=""):
     if(isFollowing):

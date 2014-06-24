@@ -51,7 +51,10 @@ def profile():
             followURL = URL('users','follow',vars=dict(userId = userId))
 
     profilePicLink = databaseQueries.getUserProfilePicture(db, userId, None)
-    return dict(profilePicLink = profilePicLink , userInfo = row, followURL = followURL, isFollowing = isFollowing)
+    numberOfFollowers = databaseQueries.getNumberOfFollowers(db, userId)
+
+    return dict(profilePicLink = profilePicLink , userInfo = row, followURL = followURL, 
+                numberOfFollowers=numberOfFollowers, isFollowing = isFollowing)
 
 @auth.requires_login()
 def editDisplayPicture():

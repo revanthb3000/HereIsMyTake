@@ -168,14 +168,15 @@ def viewTake():
     textarea['_cols'] = 1000
     textarea['_rows'] = 2
     
-    
-    isFollowing = databaseQueries.checkIfFollowing(db,authorUserId,userId)
+    authorNumberOfFollowers = databaseQueries.getNumberOfFollowers(db, authorUserId)
+    authorName = databaseQueries.getUserName(db, authorUserId)
     profilePicLink = databaseQueries.getUserProfilePicture(db, authorUserId, None)
     
     return dict(takeId = takeId, takeContent = row.takeContent, numberOfLikes = numberOfLikes,
                 editLink = editLink, deleteLink = deleteLink, isTakeLiked = isTakeLiked,
                 form = form, comments = commentRows, isCommentLiked = isCommentLiked, 
-                commentLikeCount = commentLikeCount, profilePicLink = profilePicLink, authorUserId = authorUserId)
+                commentLikeCount = commentLikeCount, profilePicLink = profilePicLink, authorUserId = authorUserId,
+                authorNumberOfFollowers = authorNumberOfFollowers, authorName = authorName)
 
 """
 This control function is used to delete a take.
@@ -323,7 +324,6 @@ def topicFeed():
     
     if(sortParameter!="Date"):
         rows = databaseQueries.getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
-        print rows
         alternateSortURL = URL('takes','topicFeed',vars=dict(topicId = topicId, sortParameter = "Date"))
     else:
         rows = databaseQueries.getTopicTakes(db, topicId,fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
@@ -408,10 +408,10 @@ def subscriptionFeed():
     
     if(sortParameter!="Date"):
         rows = databaseQueries.getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
-        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Date"))
+        alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Date"))
     else:
         rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
-        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Like"))
+        alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Like"))
     
     return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl, alternateSortURL=alternateSortURL)
 

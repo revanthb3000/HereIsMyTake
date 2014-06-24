@@ -74,6 +74,17 @@ def checkIfUserExists(db, userId):
     return False
 
 """
+Given a userId, this function will return the user's full name.
+"""
+def getUserName(db, userId):
+    fullName = ""
+    rows = db(db.auth_user.id == userId).select()
+    if len(rows) == 1:
+        row = rows[0]
+        fullName = row.first_name + " " + row.last_name
+    return fullName
+
+"""
 Given a userId, this function will return the user's profile picture link
 """
 def getUserProfilePicture(db, userId, displayPicture):
@@ -115,6 +126,13 @@ def getFollowedUsers(db, userId):
     for row in rows:
         users.append(int(row.userId))
     return users
+
+"""
+Given a userId, the number of followers of that user is returned.
+"""
+def getNumberOfFollowers(db,userId):
+    rows = db(db.followRelations.userId==userId).select()
+    return len(rows)
 
 """
 Given a <userId, takeId> pair, this function returns true if userId is the author of takeId

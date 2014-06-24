@@ -1,38 +1,46 @@
+{{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
 {{import databaseQueries}}
 {{import utilityFunctions}}
+
+{{block right_sidebar}}
+<a href="{{=alternateSortURL}}">
+	{{
+		if ("Date" in alternateSortURL):
+			="Newest Takes"
+		else:
+			="Most Liked Takes"
+		pass
+	}}
+</a>
+{{end}}
+
 
 {{
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
     db = databaseQueries.getDBHandler(userId)
 }}
 
-<a href="{{=alternateSortURL}}">
-	{{
-		if ("Date" in alternateSortURL):
-			="Sort by Date"
-		else:
-			="Sort by Likes"
-		pass
-	}}
-</a>
-<br/>
-<br/>
-<br/>
 <table>
-{{for i,row in enumerate(rows):}}
+{{
+	for i,row in enumerate(rows):
+		numberOfFollowers = databaseQueries.getNumberOfFollowers(db, row.auth_user.id)
+}}
 	{{if i==items_per_page: break}}
 	<tr class="feedRow">
 		<td>
-			<a href="{{=URL('users','profile',vars=dict(userId = row.auth_user.id))}}">
-					{{
-						displayPicture = ""
-						if (row.auth_user.displayPicture!=None):
-							displayPicture = row.auth_user.displayPicture
-							pass
-					}}
-					{{=IMG(_src=databaseQueries.getUserProfilePicture(db, row.auth_user.id, displayPicture), 
-						_alt=row.auth_user.first_name + " " + row.auth_user.last_name,_width="60px",_height="60px")}}
+			<a href="{{=URL('users','profile',vars=dict(userId = row.auth_user.id))}}" class="userPopToolTip">
+				{{
+					displayPicture = ""
+					if (row.auth_user.displayPicture!=None):
+						displayPicture = row.auth_user.displayPicture
+						pass
+				}}
+				{{=IMG(_src=databaseQueries.getUserProfilePicture(db, row.auth_user.id, displayPicture), _width="60px",_height="60px")}}
+				<span>
+			 		{{=row.auth_user.first_name + " " + row.auth_user.last_name}}<br/>
+			 		<i>{{=numberOfFollowers}} Follower{{="s" if (numberOfFollowers!=1) else ""}}</i> 	
+				</span>
 			</a>
 		</td>
 		<td>
