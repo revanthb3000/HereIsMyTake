@@ -71,7 +71,7 @@ def editProfile():
     form=SQLFORM(db.auth_user, auth.user.id, showid = False)
     if form.process().accepted:
         response.flash = 'Changes Saved.'
-        redirect(URL('users','profile'))
+        redirect(URL('users','profile',vars=dict(userId = auth.user.id)))
     elif form.errors:
         response.flash = 'Errors found in the form.'
     else:

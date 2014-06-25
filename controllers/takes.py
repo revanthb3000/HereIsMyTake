@@ -289,8 +289,6 @@ def topicFeed():
     response.title = "Topic Feed"
     
     topicId = request.vars.topicId
-    userId = (auth.user.id) if (auth.is_logged_in()) else 0
-
 
     sortParameter = "Date"
     if(request.vars.sortParameter!=None):
@@ -309,7 +307,7 @@ def topicFeed():
 
     nextUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber + 1, sortParameter = sortParameter))
     previousUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber - 1, sortParameter = sortParameter))
-    alternateSortURL = ''
+    alternateSortURL = ""
 
     #Example of getting articles in the last month
     toDate = datetime.datetime.now()
@@ -333,9 +331,6 @@ This covers everything ! All takes. No topics.
 def generalFeed():
     response.view = "takes/feed.html"
     response.title = "Take Feed"
-
-    userId = (auth.user.id) if (auth.is_logged_in()) else 0
-
     
     sortParameter = "Date"
     if(request.vars.sortParameter!=None):
@@ -349,8 +344,8 @@ def generalFeed():
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page+1
 
-    nextUrl = URL('takes','generalFeed',vars=dict(page = pageNumber + 1))
-    previousUrl = URL('takes','generalFeed',vars=dict(page = pageNumber - 1))
+    nextUrl = URL('takes','generalFeed',vars=dict(page = pageNumber + 1, sortParameter = sortParameter))
+    previousUrl = URL('takes','generalFeed',vars=dict(page = pageNumber - 1, sortParameter = sortParameter))
     alternateSortURL = ""
     
     #Example of getting articles in the last month
@@ -390,9 +385,9 @@ def subscriptionFeed():
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page+1
 
-    nextUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber + 1))
-    previousUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber - 1))
-    alternateSortURL = ""    
+    nextUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber + 1, sortParameter = sortParameter))
+    previousUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber - 1, sortParameter = sortParameter))
+    alternateSortURL = ""
 
     #Example of getting articles in the last month
     toDate = datetime.datetime.now()
@@ -407,6 +402,51 @@ def subscriptionFeed():
         alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Like"))
     
     return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl, alternateSortURL=alternateSortURL)
+
+"""
+This is the user activity feed. All the user's recent activities are retrieved and displayed over here.
+"""
+def userActivityFeed():
+    response.view = "takes/feed.html"
+    response.title = "User Activity"
+
+    userId = request.vars.userId
+    
+    if(not(utilityFunctions.checkIfVariableIsInt(userId))):
+        redirect(URL('default','index'))
+
+    userIdList = [userId]
+
+    sortParameter = "Date"
+    if(request.vars.sortParameter!=None):
+        sortParameter = request.vars.sortParameter
+
+    pageNumber = 0
+    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
+        pageNumber = int(request.vars.page)
+
+    items_per_page=10
+    rangeLowerLimit = pageNumber*items_per_page
+    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+
+    nextUrl = URL('takes','userActivityFeed',vars=dict(page = pageNumber + 1, userId = userId, sortParameter = sortParameter))
+    previousUrl = URL('takes','userActivityFeed',vars=dict(page = pageNumber - 1, userId = userId, sortParameter = sortParameter))
+    alternateSortURL = ""
+
+    #Example of getting articles in the last month
+    toDate = datetime.datetime.now()
+    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+    
+    if(sortParameter!="Date"):
+        rows = databaseQueries.getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+        alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Date"))
+    else:
+        rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+        alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Like"))
+
+    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl, alternateSortURL=alternateSortURL)
+
 
 def echo():
     print request.vars
