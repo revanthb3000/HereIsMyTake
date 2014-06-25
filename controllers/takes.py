@@ -61,7 +61,6 @@ def submitTake():
     else:
         response.flash = 'Please fill the form.'
 
-    textarea = form.element('textarea')
     return dict(form=form, takeContent = takeContent)
 
 """
@@ -114,7 +113,6 @@ def editTake():
     else:
         response.flash = 'Please fill the form.'
 
-    textarea = form.element('textarea')
     return dict(form=form, takeContent = takeContent)
 
 """

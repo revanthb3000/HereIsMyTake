@@ -5,16 +5,16 @@
 {{block right_sidebar}}
 {{=IMG(_src=profilePicLink, _alt="DP",_width="200px",_height="200px")}}
 <br/>
-<i>{{=numberOfFollowers}} Follower{{="s" if (numberOfFollowers!=1) else ""}}</i>
 <br/>
 {{
 if (followURL!=""):
     if(isFollowing):
-        =A("Unfollow",_href=followURL)
+        =A(IMG(_src=URL('static','images/unfollow.png'), _alt="Unfollow"),_href=followURL)
     else:
-        =A("Follow",_href=followURL)
+        =A(IMG(_src=URL('static','images/follow.png'), _alt="Follow"),_href=followURL)
     pass
 pass
 }}
-
+<i>({{=numberOfFollowers}} Follower{{="s" if (numberOfFollowers!=1) else ""}})</i>
+<br/>
 {{end}}
