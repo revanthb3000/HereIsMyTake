@@ -6,11 +6,15 @@
 		<td width="50%">
 			<p><b>Sex :</b> {{=userInfo.Gender}}</p>
 			<p><b>Birthday :</b> {{=userInfo.Birthday.strftime('%d-%b-%G')}}</p>
-			<p><b>Location :</b> {{=userInfo.Location}}</p>
+			{{if(userInfo.Location!=""):}}
+				<p><b>Location :</b> {{=userInfo.Location}}</p>
+			{{pass}}
 		</td>
 		
 		<td>
-			<p><b>Occupation :</b> {{=userInfo.Occupation}}</p>
+			{{if(userInfo.Occupation!=""):}}
+				<p><b>Occupation :</b> {{=userInfo.Occupation}}</p>
+			{{pass}}
 			{{if(userInfo.Website!=""):}}
 				<p><b>My Website :</b> {{=userInfo.Website}}</p>
 			{{pass}}

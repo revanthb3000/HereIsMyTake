@@ -48,9 +48,9 @@ auth = Auth(db)
 auth.settings.extra_fields['auth_user']= [
     Field('Location','string'), 
     Field('Occupation','string'), 
-    Field('Birthday','date',writable=False),#Can't be changed
+    Field('Birthday','date'),#Can't be changed
     Field('AboutMe','text'), 
-    Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other']), writable=False), #Can't be changed
+    Field('Gender','string',requires = IS_IN_SET(['Male', 'Female', 'Other'])), #Can't be changed
     Field('displayPicture', 'upload' ),
     Field('Website','string'),
     Field('timeOfJoining','datetime',writable = False)

@@ -12,6 +12,7 @@ if 0:
     auth = Auth()
     service = Service()
     crud = Crud()
+    Storage = Storage()
 
 #All the required imports.
 import databaseConnectionStrings
@@ -68,6 +69,8 @@ def editProfile():
     db.auth_user.email.writable = False
     db.auth_user.password.writable = False
     db.auth_user.email.writable = False
+    db.auth_user.Birthday.writable = False
+    db.auth_user.Gender.writable = False
 
     form = SQLFORM(db.auth_user, auth.user.id, showid = False)
     
@@ -127,6 +130,14 @@ def register():
         redirect(URL('default','index'))
     response.view = 'users/register.html'
     response.title = 'Registration'
+    
+    db.auth_user["AboutMe"].readable = db.auth_user["AboutMe"].writable = False
+    db.auth_user["Location"].readable = db.auth_user["Location"].writable = False
+    db.auth_user["Occupation"].readable = db.auth_user["Occupation"].writable = False
+    db.auth_user["Website"].readable = db.auth_user["Website"].writable = False
+    db.auth_user["displayPicture"].readable = db.auth_user["displayPicture"].writable = False
+    db.auth_user["timeOfJoining"].readable = db.auth_user["timeOfJoining"].writable = False
+    
     form = auth.register()
     return dict(form=form)
 
