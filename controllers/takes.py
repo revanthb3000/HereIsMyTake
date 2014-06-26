@@ -39,20 +39,22 @@ def submitTake():
     numOfTopics = len(topicsList)
 
     fields = []
+    options = []
 
     for i in range(1, numOfTopics):
         topicMapping = topicsList[i]
-        fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"])]
+        options += [topicMapping["topicName"]]
 
+    fields += [Field('topics','string')]
     fields += [field for field in db.takes]
     form = SQLFORM.factory(*fields)
 
     if form.process().accepted:
-        takeContent = form.vars.takeContent
+        selectedTopics = form.vars.topics
         takeId = databaseQueries.addTake(db, form.vars.takeTitle, form.vars.takeContent)
         for i in range(1, numOfTopics):
             topicMapping = topicsList[i]
-            if(form.vars[topicMapping["topicName"]]):
+            if(topicMapping["topicName"] in selectedTopics):
                 databaseQueries.addTakeTopicMapping(db, takeId, i)
 
         redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
@@ -61,7 +63,7 @@ def submitTake():
     else:
         response.flash = 'Please fill the form.'
 
-    return dict(form=form, takeContent = takeContent)
+    return dict(form=form, options = options, preSelectedTopics = [])
 
 """
 This is the control function to let a user edit a take he has previously submitted.
@@ -75,34 +77,41 @@ def editTake():
     userId = auth.user.id
     takeId = request.vars.takeId
 
-    
     if not(utilityFunctions.isTakeIdValid(takeId,db)):
         redirect(URL('default','index'))
 
     if(not(databaseQueries.checkIfUserTakePairExists(db, userId, takeId))):
         redirect(URL('default','index'))
 
-    db.takes.takeTitle.default = db.takes[takeId].takeTitle
-    db.takes.takeContent.default = db.takes[takeId].takeContent
-
-    topicMappings = databaseQueries.getTopicMappings(db, takeId)
+    takeTopicMappings = databaseQueries.getTopicMappings(db, takeId)
+    preSelectedTopics = []
     topicsList = databaseQueries.getGlobalTopicsList(db)
     numOfTopics = len(topicsList)
 
     fields = []
+    options = []
+
     for i in range(1, numOfTopics):
         topicMapping = topicsList[i]
-        fields += [Field(str(topicMapping["topicName"]),'boolean', label=topicMapping["topicName"], default = (i in topicMappings))]
+        options += [topicMapping["topicName"]]
+        if(i in takeTopicMappings):
+            preSelectedTopics += [topicMapping["topicName"]]
 
+    fields += [Field('topics','string')]
     fields += [field for field in db.takes]
     form = SQLFORM.factory(*fields)
 
-    takeContent = ""
+    takeInfo = databaseQueries.getTakeInfo(db, takeId)    
+    form.vars.takeTitle = takeInfo.takeTitle
+    form.vars.takeContent = takeInfo.takeContent
+    form.vars.topics = ['Entertainment', 'Technology', 'Friendship']
+
     if form.process().accepted:
         databaseQueries.updateTake(db, form.vars.takeTitle, form.vars.takeContent, takeId)
+        selectedTopics = form.vars.topics
         for i in range(1, numOfTopics):
             topicMapping = topicsList[i]
-            if(form.vars[topicMapping["topicName"]]):
+            if(topicMapping["topicName"] in selectedTopics):
                 databaseQueries.addTakeTopicMapping(db, takeId, i)
             else:
                 databaseQueries.removeTakeTopicMapping(db, takeId, i)
@@ -113,7 +122,8 @@ def editTake():
     else:
         response.flash = 'Please fill the form.'
 
-    return dict(form=form, takeContent = takeContent)
+    print preSelectedTopics
+    return dict(form=form, options = options, preSelectedTopics = preSelectedTopics)
 
 """
 This is the control function for the view take activity.

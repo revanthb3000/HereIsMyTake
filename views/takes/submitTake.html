@@ -1,17 +1,51 @@
 {{extend 'layout.html'}}
 <script src="{{=URL('static','ckeditor/ckeditor.js')}}"></script>
 <script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
-{{
-if takeContent!="":
-    =XML(takeContent)
-else:
-    =form
-pass
 
-}}
+{{=form.custom.begin}}
+
+<p><b>Topics : </b>
+          <select data-placeholder="Choose Topics ...." class="chosen-select" name="topics" multiple style="width:350px;" tabindex="4">
+            <option value=""></option>
+            {{for option in options:}}
+            	{{if (option in preSelectedTopics):}}
+            		<option value="{{=option}}" selected>{{=option}}</option>
+            	{{else:}}
+            		<option value="{{=option}}">{{=option}}</option>
+            	{{pass}}
+            {{pass}}
+          </select>
+</p>
+
+<p><b>Take Title : </b>{{=form.custom.widget["takeTitle"]}}</p>
+
+<p><b>Take Content : </b></p>
+
+{{=form.custom.widget["takeContent"]}}
+
+{{=form.custom.submit}}
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
+  <script src="{{=URL('static','chosenAPI/chosen.jquery.js')}}" type="text/javascript"></script>
+  <script src="{{=URL('static','chosenAPI/docsupport/prism.js')}}" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript">
+    var config = {
+      '.chosen-select'           : {},
+      '.chosen-select-deselect'  : {allow_single_deselect:true},
+      '.chosen-select-no-single' : {disable_search_threshold:10},
+      '.chosen-select-no-results': {no_results_text:'Oops, nothing found!'},
+      '.chosen-select-width'     : {width:"95%"}
+    }
+    for (var selector in config) {
+      $(selector).chosen(config[selector]);
+    }
+  </script>
+  
+{{=form.custom.end}}
+
 <script>
     CKEDITOR.replace( 'takeContent', {
     	height : 600,
-    	width : 800
+    	width : 1000
     });
 </script>
