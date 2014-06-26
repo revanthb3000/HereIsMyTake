@@ -1,2 +1,32 @@
+{{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
-{{=form}}
+
+{{=form.custom.begin}}
+<table>
+	<tr>
+		<td width="50%">
+			<p><b>Sex :</b> {{=userInfo.Gender}}</p>
+			<p><b>Birthday :</b> {{=userInfo.Birthday.strftime('%d-%b-%G')}}</p>
+			<p><b>Location :</b> {{=form.custom.widget["Location"]}}</p>
+		</td>
+		
+		<td>
+			<p><b>Occupation :</b> {{=form.custom.widget["Occupation"]}}</p>
+			<p><b>My Website :</b> {{=form.custom.widget["Website"]}}</p>
+			<p><b>Email ID :</b> {{=userInfo.email}}</p>	
+		</td>
+		
+	</tr>
+</table>
+
+<p><b>About Me :</b></p>
+<p>{{=form.custom.widget["AboutMe"]}}</p>
+
+{{=form.custom.submit}}
+
+{{block right_sidebar}}
+{{=IMG(_src=profilePicLink, _alt="DP",_width="200px",_height="200px")}}
+{{=form.custom.widget["displayPicture"]}}
+<br/>
+{{=form.custom.end}}
+{{end}}

@@ -29,20 +29,18 @@ def profile():
         redirect(URL('default','index'))
 
     userId = request.vars.userId
-
     response.view = 'users/profile.html'
-
 
     isFollowing = databaseQueries.checkIfFollowing(db,userId,auth.user.id)
 
-    rows = db(db.auth_user.id == userId).select()
-    row = None
-    if len(rows) == 1:
-        row = rows[0]
-    else:
+    userInfo = databaseQueries.getUserInfo(db, userId)
+
+    if (userInfo == None):
         redirect(URL('default','index'))
 
-    response.title = row.first_name + " " + row.last_name;
+    response.title = userInfo.first_name + " " + userInfo.last_name;
+    response.subtitle = "Joined " + userInfo.timeOfJoining.strftime('%b-%G')
+    
     followURL = ""
     if(int(auth.user.id)!=int(userId)):
         if(isFollowing):
@@ -53,22 +51,31 @@ def profile():
     profilePicLink = databaseQueries.getUserProfilePicture(db, userId, None)
     numberOfFollowers = databaseQueries.getNumberOfFollowers(db, userId)
 
-    return dict(profilePicLink = profilePicLink , userInfo = row, followURL = followURL, 
+    return dict(profilePicLink = profilePicLink , userInfo = userInfo, followURL = followURL, 
                 numberOfFollowers=numberOfFollowers, isFollowing = isFollowing)
-
-@auth.requires_login()
-def editDisplayPicture():
-    response.view = "users/editpicture.html"
-    response.title = "Change your DP"
-    form=FORM(INPUT(_name='image',_id='image', _type='file'))
-    return dict(form = form)
 
 @auth.requires_login()
 def editProfile():
     response.view = "users/editprofile.html"
     response.title = 'Editing Profile'
 
-    form=SQLFORM(db.auth_user, auth.user.id, showid = False)
+    userId = auth.user.id
+    userInfo = databaseQueries.getUserInfo(db, userId)
+    profilePicLink = databaseQueries.getUserProfilePicture(db, userId, userInfo.displayPicture)
+
+    db.auth_user.first_name.writable = False
+    db.auth_user.last_name.writable = False
+    db.auth_user.email.writable = False
+    db.auth_user.password.writable = False
+    db.auth_user.email.writable = False
+
+    form = SQLFORM(db.auth_user, auth.user.id, showid = False)
+    
+    form.vars.Location = userInfo.Location
+    form.vars.Occupation = userInfo.Occupation
+    form.vars.AboutMe = userInfo.AboutMe
+    form.vars.Website = userInfo.Website
+
     if form.process().accepted:
         response.flash = 'Changes Saved.'
         redirect(URL('users','profile',vars=dict(userId = auth.user.id)))
@@ -76,8 +83,8 @@ def editProfile():
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
-    
-    return dict(form=form, username = auth.user.first_name + " " + auth.user.last_name)
+
+    return dict(form=form, userInfo=userInfo, profilePicLink=profilePicLink)
 
 @auth.requires_login()
 def follow():

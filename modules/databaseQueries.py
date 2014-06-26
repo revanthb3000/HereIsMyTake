@@ -65,6 +65,29 @@ def getUserName(db, userId):
     return fullName
 
 """
+Given a userId, this function will return all the details of that user.
+"""
+def getUserInfo(db, userId):
+    rows = db(db.auth_user.id == userId).select()
+    row = None
+    if len(rows) == 1:
+        row = rows[0]
+    return row
+
+"""
+Given information, the user's info is updated !
+"""
+def updateUserInfo(db, userId, Location, Occupation, Website, AboutMe, displayPicture):
+    row = db(db.auth_user.id==userId).select().first()
+    row.Location = Location
+    row.Occupation = Occupation
+    row.Website = Website
+    row.AboutMe = AboutMe
+    if(displayPicture.strip()!=""):
+        row.displayPicture = displayPicture
+    row.update_record()
+
+"""
 Given a userId, this function will return the user's profile picture link
 """
 def getUserProfilePicture(db, userId, displayPicture):
