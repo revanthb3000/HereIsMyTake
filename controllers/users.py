@@ -40,7 +40,7 @@ def profile():
         redirect(URL('default','index'))
 
     response.title = userInfo.first_name + " " + userInfo.last_name;
-    response.subtitle = "Joined " + userInfo.timeOfJoining.strftime('%b-%G')
+    response.subtitle = "Joined " + utilityFunctions.getMonthName(userInfo.timeOfJoining.month) + "-" + str(userInfo.timeOfJoining.year)
     
     followURL = ""
     if(int(auth.user.id)!=int(userId)):

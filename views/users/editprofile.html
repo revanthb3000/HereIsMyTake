@@ -1,12 +1,16 @@
 {{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
+{{import utilityFunctions}}
 
 {{=form.custom.begin}}
 <table>
 	<tr>
 		<td width="50%">
 			<p><b>Sex :</b> {{=userInfo.Gender}}</p>
-			<p><b>Birthday :</b> {{=userInfo.Birthday.strftime('%d-%b-%G')}}</p>
+			{{
+				birthday = str(userInfo.Birthday.day) + "-" + utilityFunctions.getMonthName(userInfo.timeOfJoining.month) + "-" + str(userInfo.timeOfJoining.year)
+			}}
+			<p><b>Birthday :</b> {{=birthday}}</p>
 			<p><b>Location :</b> {{=form.custom.widget["Location"]}}</p>
 		</td>
 		
