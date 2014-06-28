@@ -34,7 +34,6 @@ def submitTake():
     response.view = "takes/submitTake.html"
     response.title = "Submit Take"
 
-    takeContent = ""
     topicsList = databaseQueries.getGlobalTopicsList(db)
     numOfTopics = len(topicsList)
 
@@ -223,9 +222,6 @@ The comment controller. Adds a comment and then sends you back to the page you b
 """
 @auth.requires_login()
 def postComment():
-    userId = auth.user.id
-
-
     takeId = request.vars.takeId
     commentContent = request.vars.commentContent
     if((commentContent == None) or (commentContent.strip()=="") or (not(utilityFunctions.isTakeIdValid(takeId,db)))):
