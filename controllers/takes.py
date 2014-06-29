@@ -268,23 +268,17 @@ def changeLikeStatus():
     articleId = request.vars.articleId
 
     if (not(utilityFunctions.checkIfVariableIsInt(articleId))):
-        redirect(URL('default','index'))
+        return "Invalid"
 
     if not(databaseQueries.checkIfArticleExists(db, articleId, articleType)):
-        redirect(URL('default','index'))
+        return "Invalid"
 
     if(databaseQueries.hasUserLikedArticle(db, articleId, articleType, userId)) :
         databaseQueries.unlike(db, articleId, articleType, userId)
     else:
         databaseQueries.like(db, articleId, articleType)
 
-    takeId = articleId
-    if(articleType=="Comment"):
-        row = databaseQueries.getComment(db, articleId)
-        takeId = row.takeId
-
-    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
-    return dict()
+    return databaseQueries.getNumberOfLikes(db, articleId, articleType)
 
 
 """

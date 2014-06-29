@@ -22,12 +22,12 @@
 		takeLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take"))
 	}}
 	<div class="likeLink">
-		<a id="takeLike" href="{{=takeLikeLink}}">
+		<a href="#" onclick="changeLikeStatus('{{=takeLikeLink}}','takeLike','takeLikeCount')">
 		    {{
 		        if(isTakeLiked):
-		            =IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs", _width="40px",_height="40px")
+		            =IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs", _id="takeLike", _width="40px",_height="40px")
 		        else:
-		            =IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _width="40px",_height="40px")
+		            =IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _id="takeLike", _width="40px",_height="40px")
 		        pass
 		    }}
 		</a>
@@ -50,23 +50,28 @@
 {{
 index = 0
 viewerId = (auth.user.id) if (auth.is_logged_in()) else 0
+
 for row in comments:
     userId = row.auth_user.id
     userName = row.auth_user.first_name + " " + row.auth_user.last_name
     commentContent = row.comments.commentContent
     commentId = row.comments.id
     commentLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
-    commentLikeAction = (IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs", _width="40px",_height="40px")) if (isCommentLiked[index]) else IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _width="40px",_height="40px")
+    commentImageId = "comment" + str(commentId)
+	thumbsUpPositiveImage = IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs", _id=commentImageId, _width="40px",_height="40px")
+	thumbsUpNegativeImage = IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _id=commentImageId, _width="40px",_height="40px")
+	commentLikeCountId = "commentLikeCount" + str(index)
+    commentLikeAction = (thumbsUpPositiveImage) if (isCommentLiked[index]) else thumbsUpNegativeImage
     numberOfFollowers = databaseQueries.getNumberOfFollowers(db, userId)
 }}
 
-<div class='likeCount' id = '{{="commentLikeCount" + str(index)}}'>
+<div class='likeCount' id = '{{=commentLikeCountId}}'>
 	({{=commentLikeCount[index]}})
 </div>
 
 {{ if(auth.is_logged_in()): }}
 	<div class="likeLink">
-		<a id = '{{="commentLike" + str(index)}}' href = '{{=commentLikeLink}}'>
+		<a onclick="changeLikeStatus('{{=commentLikeLink}}','{{=commentImageId}}','{{=commentLikeCountId}}')">
 			{{=commentLikeAction}}
 		</a>
 	</div>
