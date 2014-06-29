@@ -1,6 +1,7 @@
 """
 This is the users.py controller and contains all controller functions related to user actions.
 """
+from applications.HereIsMyTake import modules
 
 # Stuff to get eclipse autocomplete to work. Dead code !
 if 0:
@@ -44,10 +45,7 @@ def profile():
     
     followURL = ""
     if(int(auth.user.id)!=int(userId)):
-        if(isFollowing):
-            followURL = URL('users','unfollow',vars=dict(userId = userId))
-        else:
-            followURL = URL('users','follow',vars=dict(userId = userId))
+        followURL = URL('users','changeFollowStatus',vars=dict(userId = userId))
 
     profilePicLink = databaseQueries.getUserProfilePicture(db, userId, None)
     numberOfFollowers = databaseQueries.getNumberOfFollowers(db, userId)
@@ -90,32 +88,19 @@ def editProfile():
     return dict(form=form, userInfo=userInfo, profilePicLink=profilePicLink)
 
 @auth.requires_login()
-def follow():
+def changeFollowStatus():
     if(request.vars.userId==None):
-        redirect(URL('default','index'))
-
+        return False
+        
     userId = request.vars.userId
+    followerId = auth.user.id
     if (databaseQueries.checkIfUserExists(db,userId)):
-        db.followRelations.insert(userId=userId,followerId=auth.user.id)
-        redirect(URL('users','profile',vars=dict(userId = userId)))
-    else:
-        redirect(URL('default','index'))
-    
-    return dict()
-
-@auth.requires_login()
-def unfollow():
-    if(request.vars.userId==None):
-        redirect(URL('default','index'))
-
-    userId = request.vars.userId
-    if (databaseQueries.checkIfUserExists(db,userId)):
-        db((db.followRelations.userId==userId) & (db.followRelations.followerId==auth.user.id)).delete()
-        redirect(URL('users','profile',vars=dict(userId = userId)))
-    else:
-        redirect(URL('default','index'))
-
-    return dict()
+        if(databaseQueries.checkIfFollowing(db, userId, followerId)):
+            databaseQueries.removeFollowRelation(db, userId, followerId)
+        else:
+            databaseQueries.addFollowRelation(db, userId, followerId)
+        return True
+    return False
 
 def login():
     if(auth.is_logged_in()):

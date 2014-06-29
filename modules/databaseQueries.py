@@ -121,6 +121,19 @@ def checkIfFollowing(db,userId,followerId):
     return False
 
 """
+Given a <userId, followerId> input, an entry is inserted into the DB (if it doesn't already exist)
+"""
+def addFollowRelation(db,userId, followerId):
+    if (not(checkIfFollowing(db, userId, followerId))):
+        db.followRelations.insert(userId=userId, followerId=followerId)
+
+"""
+Given a <userId, followerId> input, the mapping is removed from the database.
+"""
+def removeFollowRelation(db, userId, followerId):
+    db((db.followRelations.userId==userId) & (db.followRelations.followerId==followerId)).delete()
+
+"""
 Given a userId, the list of users followed by that user is returned.
 """
 def getFollowedUsers(db, userId):
