@@ -90,7 +90,7 @@ def editProfile():
 @auth.requires_login()
 def changeFollowStatus():
     if(request.vars.userId==None):
-        return False
+        return "Invalid"
         
     userId = request.vars.userId
     followerId = auth.user.id
@@ -99,8 +99,10 @@ def changeFollowStatus():
             databaseQueries.removeFollowRelation(db, userId, followerId)
         else:
             databaseQueries.addFollowRelation(db, userId, followerId)
-        return True
-    return False
+        numberOfFollowers = databaseQueries.getNumberOfFollowers(db, userId)
+        returnString = str(numberOfFollowers) + " Follower" + ("s" if (numberOfFollowers!=1) else "")
+        return returnString
+    return "Invalid"
 
 def login():
     if(auth.is_logged_in()):

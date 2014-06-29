@@ -41,14 +41,22 @@
 <br/>
 {{
 if (followURL!=""):
-    if(isFollowing):
-        =A(IMG(_src=URL('static','images/unfollow.png'), _alt="Unfollow"),_href=followURL)
-    else:
-        =A(IMG(_src=URL('static','images/follow.png'), _alt="Follow"),_href=followURL)
+	}}
+	<a href='#' onclick="changeFollowStatus('{{=followURL}}')">
+
+	{{
+	    if(isFollowing):
+	    	=IMG(_src=URL('static','images/unfollow.png'), _alt="Unfollow", _id="FollowActionImage")
+    	else:
+    		=IMG(_src=URL('static','images/follow.png'), _alt="Follow", _id="FollowActionImage")
     pass
+    }}
+
+	</a>
+    {{
 pass
 }}
-<i>({{=numberOfFollowers}} Follower{{="s" if (numberOfFollowers!=1) else ""}})</i>
+<i id="followerCount">({{=numberOfFollowers}} Follower{{="s" if (numberOfFollowers!=1) else ""}})</i>
 <br/>
 <br/>
 <a href="{{=URL('takes','userActivityFeed',vars=dict(userId = userInfo.id))}}">My Activity</a>
