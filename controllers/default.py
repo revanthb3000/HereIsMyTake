@@ -12,7 +12,6 @@ if 0:
 import databaseConnectionStrings
 import databaseQueries
 import utilityFunctions
-import MySQLdb
 
 def index():
     response.view = "default/index.html"
