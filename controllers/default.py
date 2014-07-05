@@ -17,7 +17,7 @@ def index():
     response.view = "default/index.html"
     sampleNewsFeedURL = URL('takes','generalFeed')
     if(auth.is_logged_in()):
-        redirect(URL('takes','tiles'))
+        redirect(URL('takes','topicPage'))
     return dict(sampleNewsFeedURL = sampleNewsFeedURL)
 
 @cache.action()

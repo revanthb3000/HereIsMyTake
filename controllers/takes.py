@@ -457,6 +457,6 @@ def echo():
     return request.vars.name
 
 @auth.requires_login()
-def tiles():
-    redirect(URL('takes','generalFeed'))
+def topicPage():
+    response.view = "takes/topicPage.html"
     return dict()
