@@ -169,6 +169,14 @@ def checkIfTopicExists(db, topicId):
         return True
     return False
 
+"""
+Given a topicId, this function will return the name of that topic.
+"""
+def getTopicName(db, topicId):
+    rows = db(db.topics.id == topicId).select()
+    if len(rows) == 1:
+        return rows[0].topicName
+    return None
 
 """
 Basic function that gets the list of topics. Useful when classifying a take.

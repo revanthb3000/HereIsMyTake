@@ -296,6 +296,12 @@ def topicFeed():
 
     if not(utilityFunctions.checkIfVariableIsInt(topicId)):
         redirect(URL('default','index'))
+        
+    topicName = databaseQueries.getTopicName(db, topicId)
+    if(topicName==None):
+        redirect(URL('default','index'))
+
+    response.title = topicName + " Feed"
 
     pageNumber = 0
     if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
@@ -458,5 +464,7 @@ def echo():
 
 @auth.requires_login()
 def topicPage():
-    response.view = "takes/topicPage.html"
+    response.view = "takes/tiles.html"
+    response.title = None
+    response.ignoreHeading = True
     return dict()
