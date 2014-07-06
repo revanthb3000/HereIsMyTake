@@ -117,8 +117,8 @@ a.userPopToolTip span b {
 }
 
 .metro-tile {
-	background-color: #D8512B;
-	border-color: #DC6241;
+	background-color: #C0C0C0;
+	border-color: #C0C0C0;
 	width: 232px;
 	height: 104px;
 	padding: 5px;
@@ -132,6 +132,11 @@ a.userPopToolTip span b {
 	-moz-transition: 0.1s all;
 	-ms-transition: 0.1s all;
 	transition: 0.1s all;
+}
+
+.metro-tile-expand {
+	width: 232px;
+	height: 10px;
 }
 
 .metro-tile-1 {

@@ -58,3 +58,10 @@ function changeLikeStatus(likeLink, imageId, likeCountId){
 	xmlhttp.open("GET", likeLink, true);
 	xmlhttp.send();
 }
+
+/**
+ * This function will change the tiles in the page.
+ */
+function changeTiles(){
+	document.getElementById('tile-2').setAttribute('class', 'metro-tile');
+}

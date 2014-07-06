@@ -462,7 +462,6 @@ def echo():
     print databaseQueries.getUserTakesLikeSorted(db, [2], 0, 20)
     return request.vars.name
 
-@auth.requires_login()
 def topicPage():
     response.view = "takes/tiles.html"
     response.title = None
