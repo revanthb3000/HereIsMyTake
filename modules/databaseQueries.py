@@ -179,6 +179,23 @@ def getTopicName(db, topicId):
     return None
 
 """
+Given a topicId, its children(sub topics) are obtained.
+"""
+def getSubTopics(db, parentTopicId):
+    rows = db(db.topics.parentId == parentTopicId).select()
+    return rows
+
+"""
+Given a topic set, the topics that can be expanded is returned
+"""
+def getExpandableTopics(db, topicsList):
+    rows = db(db.topics.parentId.belongs(topicsList)).select()
+    expandableTopics = []
+    for row in rows:
+        expandableTopics.append(row.parentId)
+    return expandableTopics
+
+"""
 Basic function that gets the list of topics. Useful when classifying a take.
 The list returned, contains objects of the form:
 Dictionary : {"topicName": "Anime", "parentId": 5}

@@ -1,40 +1,43 @@
 {{extend "layout.html"}}
 <div class="metro-surface">
 <table>
-	<tr>
+	{{
+		i = 1
+		while(i<=len(topics)):
+			topicFeedLink = ""
+			topicName = ""
+			topicId = i
+			tileClass = "metro-tile"
+			expandClass = "metro-tile"
+			topicFeedLink = URL('takes','topicFeed',vars=dict(topicId=topics[i-1].id))
+			topicId = topics[i-1].id
+			topicName = topics[i-1].topicName
+			tileClass = tileClass + " " + "metro-tile-" + str(topicId)
+			expandClass = expandClass + " " + "metro-tile-" + str(topicId) + " metro-tile-expand"
+			if((i-1)%4==0):
+		}}
+			<tr>
+		{{
+			pass
+	}}
 		<td>
-			<a href="{{=URL('takes','topicFeed',vars=dict(topicId='1'))}}">
-				<div id="tile-1" class="metro-tile metro-tile-1">Entertainment</div>
+			<a href="{{=topicFeedLink}}">
+				<div id="tile-{{=topicId}}" class="{{=tileClass}}">{{=topicName}}</div>
 			</a>
-			<a>
-				<div class="metro-tile metro-tile-expand" onclick="changeTiles()">+</div>
+			{{if(topicId in expandableTopics):}}
+			<a href='{{=URL('takes','topicPage',vars=dict(parentId=topicId))}}'>
+				<div class="{{=expandClass}}">+</div>
 			</a>
+			{{pass}}
 		</td>
-		<td>
-			<a href="{{=URL('takes','topicFeed',vars=dict(topicId='6'))}}">
-				<div id="tile-2" class="metro-tile metro-tile-2">Sports</div>
-			</a>
-		</td>
-		<td><div id="tile-3" class="metro-tile metro-tile-3">Tweet</div></td>
-		<td><div id="tile-4" class="metro-tile metro-tile-4">Tweet</div></td>
-	</tr>
-	<tr>
-		<td><div id="tile-5" class="metro-tile metro-tile-5">Tweet</div></td>
-		<td><div id="tile-6" class="metro-tile metro-tile-6">Tweet</div></td>
-		<td><div id="tile-7" class="metro-tile metro-tile-7">Tweet</div></td>
-		<td><div id="tile-8" class="metro-tile metro-tile-8">Tweet</div></td>
-	</tr>
-	<tr>
-		<td><div id="tile-9" class="metro-tile metro-tile-9">Tweet</div></td>
-		<td><div id="tile-10" class="metro-tile metro-tile-10">Tweet</div></td>
-		<td><div id="tile-11" class="metro-tile metro-tile-11">Tweet</div></td>
-		<td><div id="tile-12" class="metro-tile metro-tile-12">Tweet</div></td>
-	</tr>
-	<tr>
-		<td><div id="tile-13" class="metro-tile metro-tile-13">Tweet</div></td>
-		<td><div id="tile-14" class="metro-tile metro-tile-14">Tweet</div></td>
-		<td><div id="tile-15" class="metro-tile metro-tile-15">Tweet</div></td>
-		<td><div id="tile-16" class="metro-tile metro-tile-16">Tweet</div></td>
-	</tr>
+	{{
+		if(i%4==0):
+		}}
+			</tr>
+		{{
+			pass
+		i = i + 1
+		pass
+	}}
 </table>
 </div>

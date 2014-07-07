@@ -463,7 +463,23 @@ def echo():
     return request.vars.name
 
 def topicPage():
+    parentId = request.vars.parentId
+    if((not(utilityFunctions.checkIfVariableIsInt(parentId)) or (not(databaseQueries.checkIfTopicExists(db, parentId))))):
+        parentId = 0
+
+    topics = databaseQueries.getSubTopics(db, parentId)
+    if(len(topics)==0):
+        redirect(URL('default','index'))
+
+    parentTopicName = "Home"
+    topicsList = []
+    for topic in topics:
+        topicsList.append(topic.id)
+    expandableTopics = databaseQueries.getExpandableTopics(db, topicsList)
+    print expandableTopics
+    if(parentId!=0):
+        parentTopicName = databaseQueries.getTopicName(db, parentId)
     response.view = "takes/tiles.html"
-    response.title = None
+    response.title = parentTopicName
     response.ignoreHeading = True
-    return dict()
+    return dict(topics = topics, expandableTopics = expandableTopics)
