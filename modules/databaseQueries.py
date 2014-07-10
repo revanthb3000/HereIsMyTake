@@ -16,6 +16,10 @@ def defineDBTables(db, userId):
     db.define_table("topics",
                         Field("id","integer"), Field("topicName","string"), Field("parentId","integer")
                     )
+    
+    db.define_table("tags",
+                        Field("id","integer"), Field("tagName","string")
+                    )
 
     db.define_table("takes",
                         Field("id","integer"), Field("takeTitle","string"), Field("takeContent","text"),
@@ -25,6 +29,10 @@ def defineDBTables(db, userId):
 
     db.define_table("take_topic_mapping",
                         Field("id","integer"), Field("takeId","integer"), Field("topicId","integer")
+                    )
+    
+    db.define_table("take_tags_mapping",
+                        Field("id","integer"), Field("takeId","integer"), Field("tagId","integer")
                     )
 
     db.define_table("followRelations",
@@ -215,6 +223,22 @@ def getGlobalTopicsList(db):
         topicMapping["parentId"] = int(row.parentId)
         topicsList.append(topicMapping)
     return topicsList
+
+"""
+Given a tagId, the tagName is returned.
+"""
+def getTagName(db, tagId):
+    rows = db(db.tags.id == tagId).select()
+    if len(rows) == 1:
+        return rows[0].tagName
+    
+"""
+Given a prefix, suggestions are returned.
+"""
+def getTagSuggestions(db, prefix, numberOfSuggestions):
+    prefix = prefix.lower() + "%"
+    rows = db(db.tags.tagName.like(prefix,case_sensitive=False), limitby = (0, numberOfSuggestions))
+    return rows
 
 """
 This function lets you either add a new take to the takes table.

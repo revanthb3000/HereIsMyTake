@@ -39,7 +39,7 @@ def _():
         (T('Submit Take'), False, URL('takes','submitTake')),
         (T('General Feed'), False, URL('takes','generalFeed')),
         (T('Subscription Feed'), False, URL('takes','subscriptionFeed')),
-        (T('Topic Feed'), False, URL('takes','tiles'), [
+        (T('Topic Feed'), False, URL('takes','topicPage'), [
                         ('Entertainment', False,
                          URL('takes','topicFeed',vars=dict(topicId='1'))),
                         (T('Sports'), False,

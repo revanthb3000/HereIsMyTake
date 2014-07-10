@@ -121,7 +121,6 @@ def editTake():
     else:
         response.flash = 'Please fill the form.'
 
-    print preSelectedTopics
     return dict(form=form, options = options, preSelectedTopics = preSelectedTopics)
 
 """
@@ -475,8 +474,8 @@ def topicPage():
     topicsList = []
     for topic in topics:
         topicsList.append(topic.id)
+    #topicsList.append("Subscriptions")
     expandableTopics = databaseQueries.getExpandableTopics(db, topicsList)
-    print expandableTopics
     if(parentId!=0):
         parentTopicName = databaseQueries.getTopicName(db, parentId)
     response.view = "takes/tiles.html"
