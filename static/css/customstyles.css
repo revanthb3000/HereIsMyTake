@@ -119,12 +119,13 @@ a.userPopToolTip span b {
 .metro-tile {
 	background-color: #FFFFFF;
 	border-color: #C1C2C7;
-	width: 232px;
+	width: 275px;
 	height: 104px;
 	padding: 5px;
 	color : #000000;
 	font-family: sans-serif;
-	font-size: 12px;
+	font-size: 22px;
+	text-align : center;
 	border-width: 3px;
 	border-style: solid;
 	cursor: default;
@@ -132,13 +133,6 @@ a.userPopToolTip span b {
 	-moz-transition: 0.1s all;
 	-ms-transition: 0.1s all;
 	transition: 0.1s all;
-}
-
-.metro-tile-expand {
-	width: 232px;
-	height: 10px;
-	text-align: center;
-	font-size: 20px;
 }
 
 .metro-tile a:link{
@@ -151,56 +145,42 @@ a.userPopToolTip span b {
 
 .metro-tile-favorites{
 	color : #000000;
-	text-align : center;
-	font-size : 20px;
 	background-color: #000000;
 	border-color: #000000;
 }
 
 .metro-tile-1 {
 	color : #000000;
-	text-align : center;
-	font-size : 20px;
 	background-color: #2A5A25;
 	border-color: #2A5A25;
 }
 
 .metro-tile-2 {
 	color : #000000;
-	text-align : center;
-	font-size : 20px;
 	background-color: #9999FF;
 	border-color: #9999FF;
 }
 
 .metro-tile-3 {
 	color : #000000;
-	text-align : center;
-	font-size : 20px;
 	background-color: #FF0000;
 	border-color: #FF0000;
 }
 
 .metro-tile-4 {
 	color : #000000;
-	text-align : center;
-	font-size : 20px;
 	background-color: #996633;
 	border-color: #996633;
 }
 
 .metro-tile-5 {
 	color : #000000;
-	text-align : center;
-	font-size : 20px;
 	background-color: #FF33CC;
 	border-color: #FF33CC;
 }
 
 .metro-tile-6 {
 	color : #000000;
-	text-align : center;
-	font-size : 20px;
 	background-color: #000099;
 	border-color: #000099;
 }

@@ -5,7 +5,7 @@
 ## Customize your APP title, subtitle and menus here
 #########################################################################
 
-response.logo = A(B('h-',SPAN('M'),'-t'),_class="brand",_href=URL('index'))
+response.logo = A(IMG(_src=URL('static','images/logo.png'), _alt="thumbs", _id="takeLike", _width="35px",_height="30px"),_class="brand",_href=URL('index'))
 response.title = request.application.replace('_',' ').title()
 response.subtitle = ''
 
