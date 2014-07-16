@@ -45,24 +45,36 @@ def submitTake():
         options += [topicMapping["topicName"]]
 
     fields += [Field('topics','string')]
+    fields += [Field('takeTags','string')]
     fields += [field for field in db.takes]
     form = SQLFORM.factory(*fields)
+    
+    tagsList = databaseQueries.getTagsList(db)
 
     if form.process().accepted:
         selectedTopics = form.vars.topics
+        selectedTags = form.vars.takeTags
         takeId = databaseQueries.addTake(db, form.vars.takeTitle, form.vars.takeContent)
         for i in range(1, numOfTopics):
             topicMapping = topicsList[i]
             if(topicMapping["topicName"] in selectedTopics):
                 databaseQueries.addTakeTopicMapping(db, takeId, i)
 
+        for tag in selectedTags.split(","):
+            try:
+                tagId = tagsList.index(tag)
+            except ValueError:
+                tagId = databaseQueries.insertTag(db, tag)
+            databaseQueries.addTakeTagMapping(db, takeId, tagId)
+            
+            
         redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
     elif form.errors:
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
 
-    return dict(form=form, options = options, preSelectedTopics = [])
+    return dict(form=form, options = options, tagsList = tagsList, preSelectedTopics = [], existingTags = "")
 
 """
 This is the control function to let a user edit a take he has previously submitted.
@@ -86,6 +98,12 @@ def editTake():
     preSelectedTopics = []
     topicsList = databaseQueries.getGlobalTopicsList(db)
     numOfTopics = len(topicsList)
+    
+    tagsList = databaseQueries.getTagsList(db)
+    preSelectedTags = databaseQueries.getTakeTags(db, takeId)
+    existingTags = ""
+    for row in preSelectedTags:
+        existingTags = existingTags + row.tags.tagName + ", "
 
     fields = []
     options = []
@@ -97,10 +115,11 @@ def editTake():
             preSelectedTopics += [topicMapping["topicName"]]
 
     fields += [Field('topics','string')]
+    fields += [Field('takeTags','string')]
     fields += [field for field in db.takes]
     form = SQLFORM.factory(*fields)
 
-    takeInfo = databaseQueries.getTakeInfo(db, takeId)    
+    takeInfo = databaseQueries.getTakeInfo(db, takeId)
     form.vars.takeTitle = takeInfo.takeTitle
     form.vars.takeContent = takeInfo.takeContent
     form.vars.topics = ['Entertainment', 'Technology', 'Friendship']
@@ -108,6 +127,7 @@ def editTake():
     if form.process().accepted:
         databaseQueries.updateTake(db, form.vars.takeTitle, form.vars.takeContent, takeId)
         selectedTopics = form.vars.topics
+        selectedTags = form.vars.takeTags
         for i in range(1, numOfTopics):
             topicMapping = topicsList[i]
             if(topicMapping["topicName"] in selectedTopics):
@@ -115,13 +135,21 @@ def editTake():
             else:
                 databaseQueries.removeTakeTopicMapping(db, takeId, i)
 
+        databaseQueries.removeTakeTags(db, takeId)
+        for tag in selectedTags.split(","):
+            try:
+                tagId = tagsList.index(tag)
+            except ValueError:
+                tagId = databaseQueries.insertTag(db, tag)
+            databaseQueries.addTakeTagMapping(db, takeId, tagId)
+
         redirect(URL('takes','viewTake',vars=dict(takeId = request.vars.takeId)))
     elif form.errors:
         response.flash = 'Errors found in the form.'
     else:
         response.flash = 'Please fill the form.'
 
-    return dict(form=form, options = options, preSelectedTopics = preSelectedTopics)
+    return dict(form=form, options = options, tagsList = tagsList, preSelectedTopics = preSelectedTopics, existingTags = existingTags)
 
 """
 This is the control function for the view take activity.

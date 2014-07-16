@@ -233,6 +233,54 @@ def getTagName(db, tagId):
         return rows[0].tagName
     
 """
+Given a new tag, it is inserted into the database.
+"""
+def insertTag(db, tagName):
+    tagName = tagName.lower()
+    tagId = db.tags.insert(tagName=tagName)
+    return tagId
+
+"""
+This function adds a <takeId, tagId> pair into the database
+"""
+def addTakeTagMapping(db, takeId, tagId):
+    if(not(checkIfTakeTagMappingExists(db, takeId, tagId))):
+        db.take_tags_mapping.insert(takeId = takeId, tagId = tagId)
+
+"""
+Given a takeId and tagId, this function tells you if the mapping exists
+"""
+def checkIfTakeTagMappingExists(db, takeId, tagId):
+    rows = db((db.take_tags_mapping.tagId==tagId) & (db.take_tags_mapping.takeId==takeId)).select()
+    if(len(rows)==1):
+        return True
+    return False
+
+"""
+Given a takId, the tags are returned.
+"""
+def getTakeTags(db, takeId):
+    rows = db((db.take_tags_mapping.takeId ==takeId) & (db.take_tags_mapping.tagId == db.tags.id)).select()
+    return rows
+
+"""
+Gets rid of all tags associated with this take.
+"""
+def removeTakeTags(db, takeId):
+    db(db.take_tags_mapping.takeId == takeId).delete()
+
+"""
+The list of tags and tagIds is returned.
+"""
+def getTagsList(db):
+    #Adding the first element to make sure that count starts from 0.
+    tags = ["dummyStuffThatllNeverbeeseeneveragain"]
+    rows = db().select(db.tags.ALL)
+    for row in rows:
+        tags.append(row.tagName)
+    return tags
+    
+"""
 Given a prefix, suggestions are returned.
 """
 def getTagSuggestions(db, prefix, numberOfSuggestions):
@@ -273,11 +321,13 @@ Given a takeId, this function gets rid of everything related to that take.
 Delete the following:
 1) Take info from the takes table.
 2) Take topic mapping from the take_topic_mapping table.
+3) Take Tag mapping from the take_tag_mapping table.
 """
 def deleteTake(db, takeId):
     db(db.takes.id==takeId).delete()
     db(db.take_topic_mapping.takeId==takeId).delete()
     db((db.likes.articleId==takeId) & (db.likes.articleType=="Take")).delete()
+    removeTakeTags(db, takeId)
 
 
 """
