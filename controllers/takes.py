@@ -25,6 +25,10 @@ def index():
     redirect(URL('default','index'))
     return dict()
 
+def echo():
+    response.view = "test.html"
+    return dict()
+
 """
 This is the control function to submit takes. 
 A rich text editor is provided and you get to select tags and submit the take content.
@@ -47,10 +51,8 @@ def submitTake():
     fields += [Field('topics','string')]
     fields += [Field('takeTags','string')]
     fields += [field for field in db.takes]
-    form = SQLFORM.factory(*fields)
+    form = SQLFORM.factory(*fields, _id = "tagform-full")
     
-    tagsList = databaseQueries.getTagsList(db)
-
     if form.process().accepted:
         selectedTopics = form.vars.topics
         selectedTags = form.vars.takeTags
@@ -61,9 +63,8 @@ def submitTake():
                 databaseQueries.addTakeTopicMapping(db, takeId, i)
 
         for tag in selectedTags.split(","):
-            try:
-                tagId = tagsList.index(tag)
-            except ValueError:
+            tagId = databaseQueries.getTagId(db, tag)
+            if(tagId == 0):
                 tagId = databaseQueries.insertTag(db, tag)
             databaseQueries.addTakeTagMapping(db, takeId, tagId)
             
@@ -74,7 +75,7 @@ def submitTake():
     else:
         response.flash = 'Please fill the form.'
 
-    return dict(form=form, options = options, tagsList = tagsList, preSelectedTopics = [], existingTags = "")
+    return dict(form=form, options = options, preSelectedTopics = [], existingTags = "")
 
 """
 This is the control function to let a user edit a take he has previously submitted.
@@ -99,11 +100,12 @@ def editTake():
     topicsList = databaseQueries.getGlobalTopicsList(db)
     numOfTopics = len(topicsList)
     
-    tagsList = databaseQueries.getTagsList(db)
     preSelectedTags = databaseQueries.getTakeTags(db, takeId)
     existingTags = ""
     for row in preSelectedTags:
         existingTags = existingTags + row.tags.tagName + ", "
+    existingTags = existingTags + "end[]"
+    existingTags = existingTags.replace(", end[]","")
 
     fields = []
     options = []
@@ -137,9 +139,8 @@ def editTake():
 
         databaseQueries.removeTakeTags(db, takeId)
         for tag in selectedTags.split(","):
-            try:
-                tagId = tagsList.index(tag)
-            except ValueError:
+            tagId = databaseQueries.getTagId(db, tag)
+            if(tagId == 0):
                 tagId = databaseQueries.insertTag(db, tag)
             databaseQueries.addTakeTagMapping(db, takeId, tagId)
 
@@ -149,7 +150,7 @@ def editTake():
     else:
         response.flash = 'Please fill the form.'
 
-    return dict(form=form, options = options, tagsList = tagsList, preSelectedTopics = preSelectedTopics, existingTags = existingTags)
+    return dict(form=form, options = options, preSelectedTopics = preSelectedTopics, existingTags = existingTags)
 
 """
 This is the control function for the view take activity.
@@ -164,6 +165,12 @@ def viewTake():
 
     userId = (auth.user.id) if (auth.is_logged_in()) else 0
 
+    preSelectedTags = databaseQueries.getTakeTags(db, takeId)
+    existingTags = ""
+    for row in preSelectedTags:
+        existingTags = existingTags + "<a href='" + URL('takes','tagFeed',vars=dict(tagId = row.tags.id)) + "'>" + row.tags.tagName + "</a>, "
+    existingTags = existingTags + "end[]"
+    existingTags = existingTags.replace(", end[]",".")
 
     row = databaseQueries.getTakeInfo(db, takeId)
     authorUserId = row.userId
@@ -205,7 +212,7 @@ def viewTake():
 
     return dict(takeId = takeId, takeContent = row.takeContent, numberOfLikes = numberOfLikes,
                 editLink = editLink, deleteLink = deleteLink, isTakeLiked = isTakeLiked,
-                form = form, comments = commentRows, isCommentLiked = isCommentLiked, 
+                form = form, comments = commentRows, isCommentLiked = isCommentLiked, existingTags = existingTags,
                 commentLikeCount = commentLikeCount, profilePicLink = profilePicLink, authorUserId = authorUserId,
                 authorNumberOfFollowers = authorNumberOfFollowers, authorName = authorName)
 
@@ -356,6 +363,55 @@ def topicFeed():
     return dict(rows=rows, page=pageNumber,items_per_page=items_per_page, 
                 nextUrl=nextUrl, previousUrl=previousUrl, 
                 alternateSortURL = alternateSortURL)
+    
+"""
+The tag feed control. Given a tagId, this will give you the list of takes in paginated form.
+"""
+def tagFeed():
+    response.view = "takes/feed.html"
+    response.title = "Tag Feed"
+    
+    tagId = request.vars.tagId
+
+    sortParameter = "Date"
+    if(request.vars.sortParameter!=None):
+        sortParameter = request.vars.sortParameter
+
+    if not(utilityFunctions.checkIfVariableIsInt(tagId)):
+        redirect(URL('default','index'))
+    
+    tagName = databaseQueries.getTagName(db, tagId)
+    if(tagName==None):
+        redirect(URL('default','index'))
+
+    response.title = tagName + " Feed"
+
+    pageNumber = 0
+    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
+        pageNumber = int(request.vars.page)
+
+    items_per_page=10
+    rangeLowerLimit = pageNumber*items_per_page
+    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+
+    nextUrl = URL('takes','tagFeed',vars=dict(tagId = tagId, page = pageNumber + 1, sortParameter = sortParameter))
+    previousUrl = URL('takes','tagFeed',vars=dict(tagId = tagId, page = pageNumber - 1, sortParameter = sortParameter))
+    alternateSortURL = ""
+
+    #Example of getting articles in the last month
+    toDate = datetime.datetime.now()
+    fromDate = datetime.datetime.now() - datetime.timedelta(days=50)
+    
+    if(sortParameter!="Date"):
+        rows = databaseQueries.getTagTakesLikeSorted(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+        alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Date"))
+    else:
+        rows = databaseQueries.getTagTakes(db, tagId,fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+        alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Like"))
+
+    return dict(rows=rows, page=pageNumber,items_per_page=items_per_page, 
+                nextUrl=nextUrl, previousUrl=previousUrl, 
+                alternateSortURL = alternateSortURL)
 
 
 """
@@ -480,15 +536,6 @@ def userActivityFeed():
 
     return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl, alternateSortURL=alternateSortURL)
 
-
-def echo():
-    print request.vars
-    userId = auth.user.id
-
-    print databaseQueries.getTopicTakesLikeSorted(db, 1, 0, 10)
-    print databaseQueries.getUserTakesLikeSorted(db, [2], 0, 20)
-    return request.vars.name
-
 def topicPage():
     parentId = request.vars.parentId
     if((not(utilityFunctions.checkIfVariableIsInt(parentId)) or (not(databaseQueries.checkIfTopicExists(db, parentId))))):
@@ -510,3 +557,17 @@ def topicPage():
     response.title = parentTopicName
     response.ignoreHeading = True
     return dict(topics = topics, expandableTopics = expandableTopics)
+
+def autoComplete():
+    term = request.vars.term
+    tags = databaseQueries.getTagSuggestions(db, term, 20)
+    jsonOutput = "["
+    for row in tags:
+        jsonOutput += "{"
+        jsonOutput += '"id": "' + row.tagName + '",'
+        jsonOutput += '"label": "' + row.tagName + '",'
+        jsonOutput += '"value": "' + row.tagName + '"'
+        jsonOutput += "},"
+    jsonOutput = jsonOutput + "]"
+    jsonOutput = jsonOutput.replace(",]", "]")
+    return jsonOutput

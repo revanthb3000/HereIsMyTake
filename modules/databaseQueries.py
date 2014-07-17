@@ -232,6 +232,16 @@ def getTagName(db, tagId):
     if len(rows) == 1:
         return rows[0].tagName
     
+
+"""
+Given a tagName, the tagId is returned.
+"""
+def getTagId(db, tagName):
+    rows = db(db.tags.tagName == tagName).select()
+    if len(rows) == 1:
+        return rows[0].id
+    return 0
+    
 """
 Given a new tag, it is inserted into the database.
 """
@@ -285,7 +295,7 @@ Given a prefix, suggestions are returned.
 """
 def getTagSuggestions(db, prefix, numberOfSuggestions):
     prefix = prefix.lower() + "%"
-    rows = db(db.tags.tagName.like(prefix,case_sensitive=False), limitby = (0, numberOfSuggestions))
+    rows = db(db.tags.tagName.like(prefix,case_sensitive=False)).select(limitby = (0, numberOfSuggestions))
     return rows
 
 """
@@ -387,6 +397,35 @@ def getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rang
                 groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
     return result
 
+"""
+Given a tagId, this function will return all takes that fall under that category
+"""
+def getTagTakes(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    rows = db((db.take_tags_mapping.takeId==db.takes.id) & 
+              (db.take_tags_mapping.tagId == tagId) & 
+              (db.takes.timeOfTake >= fromDate) & 
+              (db.takes.timeOfTake <= toDate) &
+              (db.takes.userId == db.auth_user.id)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
+    return rows
+
+
+"""
+Same as the previous function but sorting is done based on the number of likes.
+"""
+def getTagTakesLikeSorted(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+    limitby=(rangeLowerLimit,rangeUpperLimit)
+    count = db.likes.articleId.count()
+    result = db((db.likes.articleType=="Take") & 
+                (db.take_tags_mapping.takeId==db.likes.articleId) & 
+                (db.take_tags_mapping.topicId == tagId) & 
+                (db.takes.id == db.likes.articleId) &  
+                (db.takes.timeOfTake >= fromDate) & 
+                (db.takes.timeOfTake <= toDate) &
+                (db.takes.userId == db.auth_user.id)).select(
+                db.likes.ALL, db.take_tags_mapping.ALL, db.auth_user.ALL, db.takes.ALL, count, 
+                groupby = db.likes.articleId, limitby = limitby, orderby = ~count)
+    return result
 
 """
 Given a list of userIds, the takes that have been posted by these guys is retrieved.
