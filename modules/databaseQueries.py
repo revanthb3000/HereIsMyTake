@@ -418,7 +418,7 @@ def getTagTakesLikeSorted(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpp
     count = db.likes.articleId.count()
     result = db((db.likes.articleType=="Take") & 
                 (db.take_tags_mapping.takeId==db.likes.articleId) & 
-                (db.take_tags_mapping.topicId == tagId) & 
+                (db.take_tags_mapping.tagId == tagId) & 
                 (db.takes.id == db.likes.articleId) &  
                 (db.takes.timeOfTake >= fromDate) & 
                 (db.takes.timeOfTake <= toDate) &
