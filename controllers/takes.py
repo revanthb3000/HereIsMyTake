@@ -252,70 +252,6 @@ def deleteTake():
     return dict(form = form, takeTitle = row.takeTitle)
 
 """
-The comment controller. Adds a comment and then sends you back to the page you belong to.
-"""
-@auth.requires_login()
-def postComment():
-    takeId = request.vars.takeId
-    commentContent = request.vars.commentContent
-    if((commentContent == None) or (commentContent.strip()=="") or (not(utilityFunctions.isTakeIdValid(takeId,db)))):
-        redirect(URL('default','index'))
-
-    databaseQueries.addComment(db, takeId, request.vars.commentContent)
-    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
-    return dict()
-
-"""
-This controller lets you delete a comment.
-"""
-@auth.requires_login()
-def deleteComment():
-    userId = auth.user.id
-
-
-    commentId = request.vars.commentId
-    takeId = request.vars.takeId
-
-    if not(utilityFunctions.isTakeIdValid(takeId,db)):
-        redirect(URL('default','index'))
-
-    if not(utilityFunctions.checkIfVariableIsInt(commentId)):
-        commentId = 0
-
-    if not(databaseQueries.checkIfUserCommentPairExists(db, userId, commentId)):
-        redirect(URL('default','index'))
-
-    databaseQueries.deleteComment(db, commentId)
-    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
-    return dict()
-
-"""
-This is the controller that lets you like/unlike an article.
-If you call this function when an article is already liked, its unliked.
-If you call it when the user hasn't liked the article, its liked.
-"""
-@auth.requires_login()
-def changeLikeStatus():
-    userId = auth.user.id
-
-    articleType = request.vars.articleType
-    articleId = request.vars.articleId
-
-    if (not(utilityFunctions.checkIfVariableIsInt(articleId))):
-        return "Invalid"
-
-    if not(databaseQueries.checkIfArticleExists(db, articleId, articleType)):
-        return "Invalid"
-
-    if(databaseQueries.hasUserLikedArticle(db, articleId, articleType, userId)) :
-        databaseQueries.unlike(db, articleId, articleType, userId)
-    else:
-        databaseQueries.like(db, articleId, articleType)
-
-    return databaseQueries.getNumberOfLikes(db, articleId, articleType)
-
-
-"""
 The topic feed control. Given a topicId, this will give you the list of takes in paginated form.
 """
 def topicFeed():
@@ -558,6 +494,71 @@ def topicPage():
     response.ignoreHeading = True
     return dict(topics = topics, expandableTopics = expandableTopics)
 
+
+"""
+The comment controller. Adds a comment and then sends you back to the page you belong to.
+"""
+@auth.requires_login()
+def postComment():
+    takeId = request.vars.takeId
+    commentContent = request.vars.commentContent
+    if((commentContent == None) or (commentContent.strip()=="") or (not(utilityFunctions.isTakeIdValid(takeId,db)))):
+        redirect(URL('default','index'))
+
+    databaseQueries.addComment(db, takeId, request.vars.commentContent)
+    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
+    return dict()
+
+"""
+This controller lets you delete a comment.
+"""
+@auth.requires_login()
+def deleteComment():
+    userId = auth.user.id
+    commentId = request.vars.commentId
+    takeId = request.vars.takeId
+
+    if not(utilityFunctions.isTakeIdValid(takeId,db)):
+        redirect(URL('default','index'))
+
+    if not(utilityFunctions.checkIfVariableIsInt(commentId)):
+        commentId = 0
+
+    if not(databaseQueries.checkIfUserCommentPairExists(db, userId, commentId)):
+        redirect(URL('default','index'))
+
+    databaseQueries.deleteComment(db, commentId)
+    redirect(URL('takes','viewTake',vars=dict(takeId = takeId)))
+    return dict()
+
+"""
+This is the controller that lets you like/unlike an article.
+If you call this function when an article is already liked, its unliked.
+If you call it when the user hasn't liked the article, its liked.
+"""
+@auth.requires_login()
+def changeLikeStatus():
+    userId = auth.user.id
+    articleType = request.vars.articleType
+    articleId = request.vars.articleId
+
+    if (not(utilityFunctions.checkIfVariableIsInt(articleId))):
+        return "Invalid"
+
+    if not(databaseQueries.checkIfArticleExists(db, articleId, articleType)):
+        return "Invalid"
+
+    if(databaseQueries.hasUserLikedArticle(db, articleId, articleType, userId)) :
+        databaseQueries.unlike(db, articleId, articleType, userId)
+    else:
+        databaseQueries.like(db, articleId, articleType)
+
+    return databaseQueries.getNumberOfLikes(db, articleId, articleType)\
+
+
+"""
+This is used for the tags suggestions. This function will return the tag suggestions for a prefix string.
+"""
 def autoComplete():
     term = request.vars.term
     tags = databaseQueries.getTagSuggestions(db, term, 20)

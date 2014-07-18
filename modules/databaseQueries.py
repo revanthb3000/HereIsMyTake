@@ -278,17 +278,6 @@ Gets rid of all tags associated with this take.
 """
 def removeTakeTags(db, takeId):
     db(db.take_tags_mapping.takeId == takeId).delete()
-
-"""
-The list of tags and tagIds is returned.
-"""
-def getTagsList(db):
-    #Adding the first element to make sure that count starts from 0.
-    tags = ["dummyStuffThatllNeverbeeseeneveragain"]
-    rows = db().select(db.tags.ALL)
-    for row in rows:
-        tags.append(row.tagName)
-    return tags
     
 """
 Given a prefix, suggestions are returned.
@@ -305,7 +294,6 @@ def addTake(db, takeTitle, takeContent):
     takeId = db.takes.insert(takeTitle = takeTitle, takeContent = takeContent)
     return takeId
 
-
 """
 This function allows you to update the existing db record
 """
@@ -314,7 +302,6 @@ def updateTake(db, newTakeTitle, newTakeContent, takeId):
     row.takeContent = newTakeContent
     row.takeTitle = newTakeTitle
     row.update_record()
-
 
 """
 This function gets information of the take represented by takeId

@@ -15,12 +15,13 @@
 </a>
 {{end}}
 
-<table>
 {{
 	for i,row in enumerate(rows):
 		numberOfFollowers = databaseQueries.getNumberOfFollowers(db, row.auth_user.id)
 }}
 	{{if i==items_per_page: break}}
+	
+	<table>
 	<tr class="feedRow">
 		<td>
 			<a href="{{=URL('users','profile',vars=dict(userId = row.auth_user.id))}}" class="userPopToolTip">
@@ -47,8 +48,8 @@
 			{{=XML(utilityFunctions.getArticlePreview(row.takes.takeContent))}}
 		</td>
 	</tr>
+	</table>
 {{pass}}
-</table>
 
 <br/>
 {{if page:}}
