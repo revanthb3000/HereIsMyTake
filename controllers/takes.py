@@ -252,6 +252,43 @@ def deleteTake():
     return dict(form = form, takeTitle = row.takeTitle)
 
 """
+This covers everything ! All takes. No topics.
+"""
+def generalFeed():
+    response.view = "takes/feed.html"
+    response.title = "Take Feed"
+    
+    sortParameter = "Date"
+    if(request.vars.sortParameter!=None):
+        sortParameter = request.vars.sortParameter
+
+    pageNumber = 0
+    items_per_page=10
+    rangeLowerLimit = pageNumber*items_per_page
+    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+
+    alternateSortURL = ""
+    
+    toDate = datetime.datetime.now()
+    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    
+    topicId = 0
+    tagId = 0
+    ignoredTakesList = []
+    ignoredUserList = []
+    userIdList = []
+    feedCode = utilityFunctions.getRequiredTakesHTML(1, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
+                                                         ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
+    
+    if(sortParameter!="Date"):
+        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Date"))
+    else:
+        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Like"))
+
+    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL)
+
+
+"""
 The topic feed control. Given a topicId, this will give you the list of takes in paginated form.
 """
 def topicFeed():
@@ -274,31 +311,28 @@ def topicFeed():
     response.title = topicName + " Feed"
 
     pageNumber = 0
-    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
-        pageNumber = int(request.vars.page)
-
     items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page+1
 
-    nextUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber + 1, sortParameter = sortParameter))
-    previousUrl = URL('takes','topicFeed',vars=dict(topicId = topicId, page = pageNumber - 1, sortParameter = sortParameter))
     alternateSortURL = ""
 
-    #Example of getting articles in the last month
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(days=50)
+    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    
+    tagId = 0
+    ignoredTakesList = []
+    ignoredUserList = []
+    userIdList = []
+    feedCode = utilityFunctions.getRequiredTakesHTML(2, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
+                                                         ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
     if(sortParameter!="Date"):
-        rows = databaseQueries.getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','topicFeed',vars=dict(topicId = topicId, sortParameter = "Date"))
     else:
-        rows = databaseQueries.getTopicTakes(db, topicId,fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','topicFeed',vars=dict(topicId = topicId, sortParameter = "Like"))
 
-    return dict(rows=rows, page=pageNumber,items_per_page=items_per_page, 
-                nextUrl=nextUrl, previousUrl=previousUrl, 
-                alternateSortURL = alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
     
 """
 The tag feed control. Given a tagId, this will give you the list of takes in paginated form.
@@ -310,6 +344,7 @@ def tagFeed():
     tagId = request.vars.tagId
 
     sortParameter = "Date"
+    
     if(request.vars.sortParameter!=None):
         sortParameter = request.vars.sortParameter
 
@@ -323,68 +358,28 @@ def tagFeed():
     response.title = tagName + " Feed"
 
     pageNumber = 0
-    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
-        pageNumber = int(request.vars.page)
-
     items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page+1
 
-    nextUrl = URL('takes','tagFeed',vars=dict(tagId = tagId, page = pageNumber + 1, sortParameter = sortParameter))
-    previousUrl = URL('takes','tagFeed',vars=dict(tagId = tagId, page = pageNumber - 1, sortParameter = sortParameter))
     alternateSortURL = ""
 
-    #Example of getting articles in the last month
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(days=50)
+    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    
+    topicId = 0
+    ignoredTakesList = []
+    ignoredUserList = []
+    userIdList = []
+    feedCode = utilityFunctions.getRequiredTakesHTML(3, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
+                                                         ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
     if(sortParameter!="Date"):
-        rows = databaseQueries.getTagTakesLikeSorted(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Date"))
     else:
-        rows = databaseQueries.getTagTakes(db, tagId,fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Like"))
 
-    return dict(rows=rows, page=pageNumber,items_per_page=items_per_page, 
-                nextUrl=nextUrl, previousUrl=previousUrl, 
-                alternateSortURL = alternateSortURL)
-
-
-"""
-This covers everything ! All takes. No topics.
-"""
-def generalFeed():
-    response.view = "takes/feed.html"
-    response.title = "Take Feed"
-    
-    sortParameter = "Date"
-    if(request.vars.sortParameter!=None):
-        sortParameter = request.vars.sortParameter
-
-    pageNumber = 0
-    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
-        pageNumber = int(request.vars.page)
-
-    items_per_page=10
-    rangeLowerLimit = pageNumber*items_per_page
-    rangeUpperLimit = (pageNumber+1)*items_per_page+1
-
-    nextUrl = URL('takes','generalFeed',vars=dict(page = pageNumber + 1, sortParameter = sortParameter))
-    previousUrl = URL('takes','generalFeed',vars=dict(page = pageNumber - 1, sortParameter = sortParameter))
-    alternateSortURL = ""
-    
-    #Example of getting articles in the last month
-    toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(days=30)
-    
-    if(sortParameter!="Date"):
-        rows = databaseQueries.getAllTakesLikeSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
-        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Date"))
-    else:
-        rows = databaseQueries.getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
-        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Like"))
-
-    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl, alternateSortURL = alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
 
 """
 This is the subscription feed where you get the takes posted by the users you follow.
@@ -403,30 +398,28 @@ def subscriptionFeed():
         sortParameter = request.vars.sortParameter
 
     pageNumber = 0
-    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
-        pageNumber = int(request.vars.page)
-
     items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page+1
 
-    nextUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber + 1, sortParameter = sortParameter))
-    previousUrl = URL('takes','subscriptionFeed',vars=dict(page = pageNumber - 1, sortParameter = sortParameter))
     alternateSortURL = ""
 
-    #Example of getting articles in the last month
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(days=30)
-    rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    
+    topicId = 0
+    tagId = 0
+    ignoredTakesList = []
+    ignoredUserList = []
+    feedCode = utilityFunctions.getRequiredTakesHTML(4, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
+                                                         ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
     if(sortParameter!="Date"):
-        rows = databaseQueries.getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Date"))
     else:
-        rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Like"))
     
-    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl, alternateSortURL=alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
 
 """
 This is the user activity feed. All the user's recent activities are retrieved and displayed over here.
@@ -447,31 +440,32 @@ def userActivityFeed():
         sortParameter = request.vars.sortParameter
 
     pageNumber = 0
-    if((request.vars.page!=None) and utilityFunctions.checkIfVariableIsInt(request.vars.page)):
-        pageNumber = int(request.vars.page)
-
     items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page+1
 
-    nextUrl = URL('takes','userActivityFeed',vars=dict(page = pageNumber + 1, userId = userId, sortParameter = sortParameter))
-    previousUrl = URL('takes','userActivityFeed',vars=dict(page = pageNumber - 1, userId = userId, sortParameter = sortParameter))
     alternateSortURL = ""
 
-    #Example of getting articles in the last month
     toDate = datetime.datetime.now()
     fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
-    rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
+    
+    topicId = 0
+    tagId = 0
+    ignoredTakesList = []
+    ignoredUserList = []
+    feedCode = utilityFunctions.getRequiredTakesHTML(4, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
+                                                         ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
     if(sortParameter!="Date"):
-        rows = databaseQueries.getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Date"))
     else:
-        rows = databaseQueries.getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit)
         alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Like"))
 
-    return dict(rows=rows,page=pageNumber,items_per_page=items_per_page, nextUrl=nextUrl, previousUrl=previousUrl, alternateSortURL=alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
 
+"""
+This is the tiles page. Contains a tiles list of topics that can be expanded for another layer.
+"""
 def topicPage():
     parentId = request.vars.parentId
     if((not(utilityFunctions.checkIfVariableIsInt(parentId)) or (not(databaseQueries.checkIfTopicExists(db, parentId))))):
@@ -555,7 +549,6 @@ def changeLikeStatus():
 
     return databaseQueries.getNumberOfLikes(db, articleId, articleType)\
 
-
 """
 This is used for the tags suggestions. This function will return the tag suggestions for a prefix string.
 """
@@ -572,3 +565,8 @@ def autoComplete():
     jsonOutput = jsonOutput + "]"
     jsonOutput = jsonOutput.replace(",]", "]")
     return jsonOutput
+
+"""
+"""
+def getRequiredTakes():
+    return 0

@@ -1,7 +1,5 @@
 {{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
-{{import databaseQueries}}
-{{import utilityFunctions}}
 
 {{block right_sidebar}}
 <a href="{{=alternateSortURL}}">
@@ -15,47 +13,6 @@
 </a>
 {{end}}
 
-{{
-	for i,row in enumerate(rows):
-		numberOfFollowers = databaseQueries.getNumberOfFollowers(db, row.auth_user.id)
-}}
-	{{if i==items_per_page: break}}
-	
-	<table>
-	<tr class="feedRow">
-		<td>
-			<a href="{{=URL('users','profile',vars=dict(userId = row.auth_user.id))}}" class="userPopToolTip">
-				{{
-					displayPicture = ""
-					if (row.auth_user.displayPicture!=None):
-						displayPicture = row.auth_user.displayPicture
-						pass
-				}}
-				{{=IMG(_src=databaseQueries.getUserProfilePicture(db, row.auth_user.id, displayPicture), _width="60px",_height="60px")}}
-				<span>
-			 		{{=row.auth_user.first_name + " " + row.auth_user.last_name}}<br/>
-			 		<i>{{=numberOfFollowers}} Follower{{="s" if (numberOfFollowers!=1) else ""}}</i> 	
-				</span>
-			</a>
-		</td>
-		<td>
-			<a href="{{=URL('takes','viewTake',vars=dict(takeId=row.takes.id))}}">{{=row.takes.takeTitle}}</a> 
-			<div class='likeCount' id = 'takeLikeCount'>
-				{{=IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _width="25px",_height="25px")}}
-				{{=databaseQueries.getNumberOfLikes(db, row.takes.id, "Take")}}
-			</div>
-			<br/>
-			{{=XML(utilityFunctions.getArticlePreview(row.takes.takeContent))}}
-		</td>
-	</tr>
-	</table>
-{{pass}}
+{{=XML(feedCode)}}
 
 <br/>
-{{if page:}}
-<a href="{{=previousUrl}}">Previous</a>
-{{pass}}
-
-{{if len(rows)>items_per_page:}}
-<a href="{{=nextUrl}}">Next</a>
-{{pass}}

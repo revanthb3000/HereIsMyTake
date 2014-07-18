@@ -330,9 +330,11 @@ def deleteTake(db, takeId):
 """
 This function will retrieve all takes in the DB sorted by date.
 """
-def getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db((db.takes.timeOfTake >= fromDate) & 
+    rows = db((~(db.takes.id.belongs(ignoredTakesList))) &
+              (~(db.takes.userId.belongs(ignoredUserList))) &
+              (db.takes.timeOfTake >= fromDate) & 
               (db.takes.timeOfTake <= toDate) &
               (db.takes.userId == db.auth_user.id)).select(db.takes.ALL, db.auth_user.ALL, limitby = limitby, orderby = ~db.takes.timeOfTake)
     return rows
@@ -341,10 +343,12 @@ def getAllTakes(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
 """
 Same as the above but sorts according to likes.
 """
-def getAllTakesLikeSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getAllTakesLikeSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     count = db.likes.articleId.count()
-    result = db((db.likes.articleType=="Take") &
+    result = db((~(db.takes.id.belongs(ignoredTakesList))) &
+                (~(db.takes.userId.belongs(ignoredUserList))) &
+                (db.likes.articleType=="Take") &
                 (db.takes.id == db.likes.articleId) &  
                 (db.takes.timeOfTake >= fromDate) & 
                 (db.takes.timeOfTake <= toDate) &
@@ -357,9 +361,11 @@ def getAllTakesLikeSorted(db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit
 """
 Given a topicId, this function will return all takes that fall under that category
 """
-def getTopicTakes(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getTopicTakes(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db((db.take_topic_mapping.takeId==db.takes.id) & 
+    rows = db((~(db.takes.id.belongs(ignoredTakesList))) &
+              (~(db.takes.userId.belongs(ignoredUserList))) &
+              (db.take_topic_mapping.takeId==db.takes.id) & 
               (db.take_topic_mapping.topicId == topicId) & 
               (db.takes.timeOfTake >= fromDate) & 
               (db.takes.timeOfTake <= toDate) &
@@ -370,10 +376,12 @@ def getTopicTakes(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimi
 """
 Same as the previous function but sorting is done based on the number of likes.
 """
-def getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     count = db.likes.articleId.count()
-    result = db((db.likes.articleType=="Take") & 
+    result = db((~(db.takes.id.belongs(ignoredTakesList))) &
+              (~(db.takes.userId.belongs(ignoredUserList))) &
+                (db.likes.articleType=="Take") & 
                 (db.take_topic_mapping.takeId==db.likes.articleId) & 
                 (db.take_topic_mapping.topicId == topicId) & 
                 (db.takes.id == db.likes.articleId) &  
@@ -387,9 +395,11 @@ def getTopicTakesLikeSorted(db, topicId, fromDate, toDate, rangeLowerLimit, rang
 """
 Given a tagId, this function will return all takes that fall under that category
 """
-def getTagTakes(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getTagTakes(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db((db.take_tags_mapping.takeId==db.takes.id) & 
+    rows = db((~(db.takes.id.belongs(ignoredTakesList))) &
+              (~(db.takes.userId.belongs(ignoredUserList))) &
+              (db.take_tags_mapping.takeId==db.takes.id) & 
               (db.take_tags_mapping.tagId == tagId) & 
               (db.takes.timeOfTake >= fromDate) & 
               (db.takes.timeOfTake <= toDate) &
@@ -400,10 +410,12 @@ def getTagTakes(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
 """
 Same as the previous function but sorting is done based on the number of likes.
 """
-def getTagTakesLikeSorted(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getTagTakesLikeSorted(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     count = db.likes.articleId.count()
-    result = db((db.likes.articleType=="Take") & 
+    result = db((~(db.takes.id.belongs(ignoredTakesList))) &
+                (~(db.takes.userId.belongs(ignoredUserList))) &
+                (db.likes.articleType=="Take") & 
                 (db.take_tags_mapping.takeId==db.likes.articleId) & 
                 (db.take_tags_mapping.tagId == tagId) & 
                 (db.takes.id == db.likes.articleId) &  
@@ -417,9 +429,10 @@ def getTagTakesLikeSorted(db, tagId, fromDate, toDate, rangeLowerLimit, rangeUpp
 """
 Given a list of userIds, the takes that have been posted by these guys is retrieved.
 """
-def getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
-    rows = db(db.takes.userId.belongs(userIdList) & 
+    rows = db((~(db.takes.id.belongs(ignoredTakesList))) &
+              db.takes.userId.belongs(userIdList) & 
              (db.takes.timeOfTake >= fromDate) & 
              (db.takes.timeOfTake <= toDate) &
              (db.takes.userId == db.auth_user.id)).select(limitby = limitby, orderby = ~db.takes.timeOfTake)
@@ -428,10 +441,11 @@ def getUserTakes(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLi
 """
 Same as the previous function but sorting is done based on the number of likes.
 """
-def getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit):
+def getUserTakesLikeSorted(db, userIdList, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList):
     limitby=(rangeLowerLimit,rangeUpperLimit)
     count = db.likes.articleId.count()
-    result = db((db.likes.articleType=="Take") & 
+    result = db((~(db.takes.id.belongs(ignoredTakesList))) &
+                (db.likes.articleType=="Take") & 
                 (db.takes.id == db.likes.articleId) &  
                 (db.takes.userId.belongs(userIdList)) & 
                 (db.takes.timeOfTake >= fromDate) & 
