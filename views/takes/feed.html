@@ -1,6 +1,5 @@
 {{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
-
 {{block right_sidebar}}
 <a href="{{=alternateSortURL}}">
 	{{
@@ -13,6 +12,40 @@
 </a>
 {{end}}
 
+<script type="text/javascript">
+            var count = 1;
+            $(window).scroll(function(){
+                    if  ($(window).scrollTop() == $(document).height() - $(window).height()){
+                   	   if(count>4){
+                            return false;
+                   	   }
+                   	   url = "{{=XML(loadContentLink)}}"
+                   	   ajaxUrl = url.replace('replaceMEPageNumber',count)
+                       loadArticle(ajaxUrl);
+                       count++;
+                    }
+            });
+ 
+            function loadArticle(ajaxUrl){   
+                    $.ajax({
+                        url: ajaxUrl,
+                        type:'POST',
+                        data: "",
+                        success: function(html){
+                              $('a#inifiniteLoader').hide('1000');
+                              $("#content").append(html);	
+                        }
+                    });
+                return false;
+            }
+</script>
+
+<div id="content">
+
 {{=XML(feedCode)}}
 
+</div>
+
 <br/>
+
+<div align='center'><a id="inifiniteLoader"><img src="{{=URL('static','images/ajax-loader.gif')}}" /></a></div>

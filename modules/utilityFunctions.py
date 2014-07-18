@@ -93,6 +93,8 @@ This function returns the HTML Code for a set of takes.
 def getRequiredTakesHTML(feedType, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList, topicId, tagId, userIdList):
     rows = getRequiredTakes(feedType, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit,
                             ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
+    if(rows==None):
+        return ""
     htmlCode = ""
     for row in rows:
         numberOfFollowers = databaseQueries.getNumberOfFollowers(db, row.auth_user.id)

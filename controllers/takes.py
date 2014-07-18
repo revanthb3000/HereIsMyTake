@@ -21,6 +21,9 @@ import utilityFunctions
 import MySQLdb
 import datetime
 
+global items_per_page
+items_per_page=10
+
 def index():
     redirect(URL('default','index'))
     return dict()
@@ -263,9 +266,8 @@ def generalFeed():
         sortParameter = request.vars.sortParameter
 
     pageNumber = 0
-    items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
-    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+    rangeUpperLimit = (pageNumber+1)*items_per_page
 
     alternateSortURL = ""
     
@@ -280,12 +282,15 @@ def generalFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(1, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
+    loadContentLink = URL('takes','getNewTakes', vars=dict(feedType = 1, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList))    
     if(sortParameter!="Date"):
         alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Date"))
     else:
         alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Like"))
 
-    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL)
+    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL, loadContentLink = loadContentLink)
 
 
 """
@@ -311,9 +316,8 @@ def topicFeed():
     response.title = topicName + " Feed"
 
     pageNumber = 0
-    items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
-    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+    rangeUpperLimit = (pageNumber+1)*items_per_page
 
     alternateSortURL = ""
 
@@ -327,12 +331,15 @@ def topicFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(2, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
+    loadContentLink = URL('takes','getNewTakes', vars=dict(feedType = 2, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList))
     if(sortParameter!="Date"):
         alternateSortURL = URL('takes','topicFeed',vars=dict(topicId = topicId, sortParameter = "Date"))
     else:
         alternateSortURL = URL('takes','topicFeed',vars=dict(topicId = topicId, sortParameter = "Like"))
 
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
     
 """
 The tag feed control. Given a tagId, this will give you the list of takes in paginated form.
@@ -358,9 +365,8 @@ def tagFeed():
     response.title = tagName + " Feed"
 
     pageNumber = 0
-    items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
-    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+    rangeUpperLimit = (pageNumber+1)*items_per_page
 
     alternateSortURL = ""
 
@@ -374,12 +380,16 @@ def tagFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(3, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
+    loadContentLink = URL('takes','getNewTakes', vars=dict(feedType = 3, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList))
+    
     if(sortParameter!="Date"):
         alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Date"))
     else:
         alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Like"))
 
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
 
 """
 This is the subscription feed where you get the takes posted by the users you follow.
@@ -398,9 +408,8 @@ def subscriptionFeed():
         sortParameter = request.vars.sortParameter
 
     pageNumber = 0
-    items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
-    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+    rangeUpperLimit = (pageNumber+1)*items_per_page
 
     alternateSortURL = ""
 
@@ -414,12 +423,15 @@ def subscriptionFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(4, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
+    loadContentLink = URL('takes','getNewTakes', vars=dict(feedType = 4, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList))
     if(sortParameter!="Date"):
         alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Date"))
     else:
         alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Like"))
     
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
 
 """
 This is the user activity feed. All the user's recent activities are retrieved and displayed over here.
@@ -440,9 +452,8 @@ def userActivityFeed():
         sortParameter = request.vars.sortParameter
 
     pageNumber = 0
-    items_per_page=10
     rangeLowerLimit = pageNumber*items_per_page
-    rangeUpperLimit = (pageNumber+1)*items_per_page+1
+    rangeUpperLimit = (pageNumber+1)*items_per_page
 
     alternateSortURL = ""
 
@@ -456,12 +467,16 @@ def userActivityFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(4, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
+    loadContentLink = URL('takes','getNewTakes', vars=dict(feedType = 4, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList))
+    
     if(sortParameter!="Date"):
         alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Date"))
     else:
         alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Like"))
 
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL)
+    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
 
 """
 This is the tiles page. Contains a tiles list of topics that can be expanded for another layer.
@@ -547,7 +562,7 @@ def changeLikeStatus():
     else:
         databaseQueries.like(db, articleId, articleType)
 
-    return databaseQueries.getNumberOfLikes(db, articleId, articleType)\
+    return databaseQueries.getNumberOfLikes(db, articleId, articleType)
 
 """
 This is used for the tags suggestions. This function will return the tag suggestions for a prefix string.
@@ -567,6 +582,55 @@ def autoComplete():
     return jsonOutput
 
 """
+This is used for the endless scroll part. You send args to this bad boy and he will tell you what to load.
 """
-def getRequiredTakes():
-    return 0
+def getNewTakes():
+    feedType = int(request.vars.feedType)
+    sortParameter = str(request.vars.sortParameter)
+    pageNumber = int(request.vars.pageNumber)
+    topicId = int(request.vars.topicId)
+    tagId = int(request.vars.tagId)
+    
+    ignoredTakesList = []
+    ignoredTakesListStr = request.vars.ignoredTakesList
+    if(ignoredTakesListStr != None):
+        for element in ignoredTakesListStr:
+            ignoredTakesList.append(int(element))
+    
+    ignoredUserList = []
+    ignoredUserListStr = request.vars.ignoredUserList
+    if(ignoredUserListStr != None):
+        for element in ignoredUserListStr:
+            ignoredUserList.append(int(element))
+    
+    userIdList = []
+    userIdListStr = request.vars.userIdList
+    if(userIdListStr != None):
+        for element in userIdListStr:
+            userIdList.append(int(element))
+
+    toDate = datetime.datetime.now()
+    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    rangeLowerLimit = pageNumber*items_per_page + 1
+    rangeUpperLimit = (pageNumber+1)*items_per_page
+    
+    """    
+    print feedType
+    print sortParameter
+    print pageNumber
+    print topicId
+    print tagId
+    print ignoredTakesList
+    print ignoredUserList
+    print userIdList
+    print rangeLowerLimit
+    print rangeUpperLimit
+    print toDate
+    print fromDate
+    print utilityFunctions.getRequiredTakes(feedType, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
+    """
+    
+    htmlCode = utilityFunctions.getRequiredTakesHTML(feedType, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
+                                                     ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
+    return htmlCode
+
