@@ -185,6 +185,15 @@ def getTopicName(db, topicId):
     if len(rows) == 1:
         return rows[0].topicName
     return None
+ 
+"""
+Given a prefix, suggestions are returned.
+"""
+def getTopicSuggestions(db, prefix, numberOfSuggestions):
+    prefix = prefix.lower() + "%"
+    rows = db(db.topics.topicName.like(prefix,case_sensitive=False)).select(limitby = (0, numberOfSuggestions))
+    return rows
+
 
 """
 Given a topicId, its children(sub topics) are obtained.
