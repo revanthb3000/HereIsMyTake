@@ -149,7 +149,16 @@ def getTilesCodeByParentId():
         topicsList.append(topic.id)
     expandableTopics = databaseQueries.getExpandableTopics(db, topicsList)
     grandParentId = databaseQueries.getTopicParent(db, parentId)
-    if(parentId!=0):
-        parentTopicName = databaseQueries.getTopicName(db, parentId)
     htmlCode = utilityFunctions.getRequiredTilesHtmlCode(parentId, topics, expandableTopics, grandParentId)
+    return htmlCode
+
+"""
+Given a prefix string, the tiles matching that prefix are returned.
+"""
+def getTilesCodeByPrefix():
+    prefix = str(request.vars.prefix)
+    topics = databaseQueries.getTopicSuggestions(db, prefix, 12)
+    htmlCode = utilityFunctions.getPrefixTilesHtmlCode(topics)
+    if (htmlCode == "<table></table>\n"):
+        htmlCode = "<p><i><b>No Results Found</b></i></p>"
     return htmlCode

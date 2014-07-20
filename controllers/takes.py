@@ -497,10 +497,12 @@ def topicPage():
         parentTopicName = databaseQueries.getTopicName(db, parentId)
     
     htmlCode = utilityFunctions.getRequiredTilesHtmlCode(parentId, topics, expandableTopics, 0)
+    tileSearchLink = URL('ajax','getTilesCodeByPrefix',vars=dict(prefix = "THISISTHEPREFIX"))
+    defaultTilesLink = URL('ajax','getTilesCodeByParentId',vars=dict(parentId = 0))
     response.view = "takes/tiles.html"
     response.title = parentTopicName
     response.ignoreHeading = True
-    return dict(topics = topics, expandableTopics = expandableTopics, htmlCode = htmlCode)
+    return dict(topics = topics, expandableTopics = expandableTopics, htmlCode = htmlCode, tileSearchLink = tileSearchLink, defaultTilesLink = defaultTilesLink)
 
 
 """

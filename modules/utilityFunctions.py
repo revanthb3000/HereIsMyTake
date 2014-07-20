@@ -195,3 +195,43 @@ def getRequiredTilesHtmlCode(parentId, topics, expandableTopics, grandParentId):
         htmlCode += "</tr>"
     htmlCode += "</table>\n"
     return htmlCode
+
+"""
+This is for the suggestions while searching for a topic. A list of topics is fed to the function which outputs the tile code.
+Note : The 'expand' links are removed.
+"""
+def getPrefixTilesHtmlCode(topics):
+    htmlCode = "<table>"
+    tileColors = [1,2,3,4,5,6,7]#,8,9,10,11,12]
+    random.shuffle(tileColors)
+    rowSize = 4
+    i = 1
+    while(i <= (len(topics))):
+        topicFeedLink = ""
+        topicName = ""
+        topicId = i
+        tileClass = "metro-tile"
+        topicFeedLink = URL('takes','topicFeed',vars=dict(topicId=topics[i-1].id))
+        topicId = topics[i-1].id
+        topicName = topics[i-1].topicName
+        tileClass = tileClass + " " + "metro-tile-" + str(tileColors[i])
+
+        if((i-1)%rowSize==0):
+            htmlCode += '<tr>\n'
+        
+        htmlCode += '<td>\n'
+        htmlCode += '<div id="tile-' + str(topicId) + '" class="' + str(tileClass) + '">\n'
+        htmlCode += '<a href="' + topicFeedLink + '">\n'
+        htmlCode += '<br/>\n<br/>\n'
+        htmlCode += topicName
+
+        htmlCode += '</a>\n<br/>\n<br/>\n'
+        htmlCode += '</div>\n'
+        htmlCode += '</td>\n'
+        if(i%rowSize==0):
+            htmlCode += '</tr>'
+        i = i + 1
+    if((htmlCode[-5:]!="</tr>") & (htmlCode!="<table>")):
+        htmlCode += "</tr>"
+    htmlCode += "</table>\n"
+    return htmlCode

@@ -1,10 +1,9 @@
 {{extend "layout.html"}}
 <div align="center">
-	<input type="text" value="Type something to search"/>
+	<input type="text" id="searchText" placeholder="Type here to search !" value="" onkeyup="loadSearchTiles()"/>
 </div>
 
 <script type="text/javascript">
-
     function loadTiles(ajaxUrl){   
         $.ajax({
             url: ajaxUrl,
@@ -14,8 +13,21 @@
                   $("#tilesContent").html(html);	
             }
         });
-    return false;
+    	return false;
 	}
+    
+    function loadSearchTiles(){
+		element = document.getElementById("searchText");
+		searchText = element.value;
+		if(searchText!=""){
+			url = "{{=tileSearchLink}}";
+			ajaxUrl = url.replace('THISISTHEPREFIX',searchText);
+		}
+		else{
+			ajaxUrl = "{{=defaultTilesLink}}";
+		}
+		loadTiles(ajaxUrl);
+    }
 </script>
 <br/>
 <div id="tilesContent" class="metro-surface">
