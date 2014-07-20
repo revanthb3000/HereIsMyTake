@@ -1,65 +1,23 @@
 {{extend "layout.html"}}
-<div class="metro-surface">
-<table>
-	{{
-		i = 1
-		rowSize = 4
-		while(i<= (len(topics) + 1)):
-			topicFeedLink = ""
-			topicName = ""
-			topicId = i
-			tileClass = "metro-tile"
-			if(i == (len(topics)+1)):
-				topicFeedLink = URL('takes','subscriptionFeed')
-				topicId = "favorites"
-				topicName = "Favorites-Subscription"
-				tileClass = tileClass + " " + "metro-tile-favorites"
-			else:
-				topicFeedLink = URL('takes','topicFeed',vars=dict(topicId=topics[i-1].id))
-				topicId = topics[i-1].id
-				topicName = topics[i-1].topicName
-				tileClass = tileClass + " " + "metro-tile-" + str(topicId)
-			pass
-			if((i-1)%rowSize==0):
-		}}
-			<tr>
-		{{
-			pass
-	}}
-		<td>
-				<div id="tile-{{=topicId}}" class="{{=tileClass}}">
-					<a href="{{=topicFeedLink}}">
-						{{
-							if(topicName!="Favorites-Subscription"):
-								}}
-									<br/>
-				                    <br/>
-									{{=topicName}}
-								{{
-							else:
-								=IMG(_src=URL('static','images/subscriptionStar.png'), _alt="thumbs", _id="starTile")
-							pass
-						}}
-					</a>
-                    <br/>
-                    <br/>
-                    {{if(topicId in expandableTopics):}}
-                    <div align="right">
-                    <a href='{{=URL('takes','topicPage',vars=dict(parentId=topicId))}}'>
-						+
-                    </a>
-                    </div>
-                    {{pass}}
-                </div>
-		</td>
-	{{
-		if(i%rowSize==0):
-		}}
-			</tr>
-		{{
-			pass
-		i = i + 1
-		pass
-	}}
-</table>
+<div align="center">
+	<input type="text" value="Type something to search"/>
+</div>
+
+<script type="text/javascript">
+
+    function loadTiles(ajaxUrl){   
+        $.ajax({
+            url: ajaxUrl,
+            type:'POST',
+            data: "",
+            success: function(html){
+                  $("#tilesContent").html(html);	
+            }
+        });
+    return false;
+	}
+</script>
+<br/>
+<div id="tilesContent" class="metro-surface">
+	{{=XML(htmlCode)}}
 </div>

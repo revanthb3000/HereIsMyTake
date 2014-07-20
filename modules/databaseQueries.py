@@ -203,6 +203,16 @@ def getSubTopics(db, parentTopicId):
     return rows
 
 """
+Given a topicId, its parentId is returned.
+"""
+def getTopicParent(db, topicId):
+    rows = db(db.topics.id == topicId).select()
+    parentId = 0
+    if len(rows) == 1:
+        parentId = int(rows[0].parentId)
+    return parentId
+
+"""
 Given a topic set, the topics that can be expanded is returned
 """
 def getExpandableTopics(db, topicsList):

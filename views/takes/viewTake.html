@@ -19,7 +19,7 @@
 	</div>
 	
 	{{ if(auth.is_logged_in()):
-		takeLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take"))
+		takeLikeLink = URL('ajax','changeLikeStatus',vars=dict(articleId = takeId, articleType = "Take"))
 	}}
 	<div class="likeLink">
 		<a href="#" onclick="changeLikeStatus('{{=takeLikeLink}}','takeLike','takeLikeCount')">
@@ -60,7 +60,7 @@ for row in comments:
     userName = row.auth_user.first_name + " " + row.auth_user.last_name
     commentContent = row.comments.commentContent
     commentId = row.comments.id
-    commentLikeLink = URL('takes','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
+    commentLikeLink = URL('ajax','changeLikeStatus',vars=dict(articleId = commentId, articleType = "Comment"))
     commentImageId = "comment" + str(commentId)
 	thumbsUpPositiveImage = IMG(_src=URL('static','images/thumbsUpPositive.png'), _alt="thumbs", _id=commentImageId, _width="40px",_height="40px")
 	thumbsUpNegativeImage = IMG(_src=URL('static','images/thumbsUpNegative.png'), _alt="thumbs", _id=commentImageId, _width="40px",_height="40px")

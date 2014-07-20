@@ -45,7 +45,7 @@ def profile():
     
     followURL = ""
     if(int(auth.user.id)!=int(userId)):
-        followURL = URL('users','changeFollowStatus',vars=dict(userId = userId))
+        followURL = URL('ajax','changeFollowStatus',vars=dict(userId = userId))
 
     profilePicLink = databaseQueries.getUserProfilePicture(db, userId, None)
     numberOfFollowers = databaseQueries.getNumberOfFollowers(db, userId)
@@ -86,23 +86,6 @@ def editProfile():
         response.flash = 'Please fill the form.'
 
     return dict(form=form, userInfo=userInfo, profilePicLink=profilePicLink)
-
-@auth.requires_login()
-def changeFollowStatus():
-    if(request.vars.userId==None):
-        return "Invalid"
-        
-    userId = request.vars.userId
-    followerId = auth.user.id
-    if (databaseQueries.checkIfUserExists(db,userId)):
-        if(databaseQueries.checkIfFollowing(db, userId, followerId)):
-            databaseQueries.removeFollowRelation(db, userId, followerId)
-        else:
-            databaseQueries.addFollowRelation(db, userId, followerId)
-        numberOfFollowers = databaseQueries.getNumberOfFollowers(db, userId)
-        returnString = str(numberOfFollowers) + " Follower" + ("s" if (numberOfFollowers!=1) else "")
-        return returnString
-    return "Invalid"
 
 def login():
     if(auth.is_logged_in()):

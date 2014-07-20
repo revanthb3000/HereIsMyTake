@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # coding: utf8
 from gluon import *
-import os
 import databaseQueries
 import re
+import random
 
 def checkIfVariableIsInt(var):
     try:
@@ -128,4 +128,70 @@ def getRequiredTakesHTML(feedType, sortParameter, db, fromDate, toDate, rangeLow
         htmlCode += '</tr>\n'
         htmlCode += '</table>\n'
         
+    return htmlCode
+
+"""
+Given a parentId, htmlCode that's used to display tiles of that topic's children is returned.
+"""
+def getRequiredTilesHtmlCode(parentId, topics, expandableTopics, grandParentId):
+    htmlCode = "<table>"
+    tileColors = [1,2,3,4,5,6,7]#,8,9,10,11,12]
+    random.shuffle(tileColors)
+    rowSize = 4
+    i = 1
+    while(i <= (len(topics) + 1)):
+        topicFeedLink = ""
+        topicName = ""
+        topicId = i
+        tileClass = "metro-tile"
+
+        if(i == (len(topics)+1)):
+            if(parentId == 0):
+                topicFeedLink = URL('takes','subscriptionFeed')
+                topicId = "favorites"
+                topicName = "Favorites-Subscription"
+                tileClass = tileClass + " " + "metro-tile-favorites"
+            else:
+                topicFeedLink = ""
+                topicId = "levelUp"
+                topicName = "levelUp"
+                tileClass = tileClass + " " + "metro-tile-levelUp"
+        else:
+            topicFeedLink = URL('takes','topicFeed',vars=dict(topicId=topics[i-1].id))
+            topicId = topics[i-1].id
+            topicName = topics[i-1].topicName
+            tileClass = tileClass + " " + "metro-tile-" + str(tileColors[i])
+
+        if((i-1)%rowSize==0):
+            htmlCode += '<tr>\n'
+        
+        htmlCode += '<td>\n'
+        htmlCode += '<div id="tile-' + str(topicId) + '" class="' + str(tileClass) + '">\n'
+        if(topicName=="Favorites-Subscription"):
+            htmlCode += '<a href="' + topicFeedLink + '">\n'            
+            htmlCode += str(IMG(_src=URL('static','images/subscriptionStar.png'), _alt="thumbs", _id="starTile")) + '\n'
+        elif(topicName=="levelUp"):
+            htmlCode += '<a onclick=\'loadTiles("' + URL('ajax','getTilesCodeByParentId',vars=dict(parentId = grandParentId)) + '")\'>\n'
+            htmlCode += str(IMG(_src=URL('static','images/levelUpArrow.png'), _alt="thumbs", _id="starTile")) + '\n'
+        else:
+            htmlCode += '<a href="' + topicFeedLink + '">\n'
+            htmlCode += '<br/>\n<br/>\n'
+            htmlCode += topicName
+
+        htmlCode += '</a>\n<br/>\n<br/>\n'
+        if(topicId in expandableTopics):
+            htmlCode += '<div align="right">\n'
+            htmlCode += '<a onclick=\'loadTiles("' + URL('ajax','getTilesCodeByParentId',vars=dict(parentId=topicId)) + '")\'>\n'
+            htmlCode += '+\n'
+            htmlCode += '</a>\n'
+            htmlCode += '</div>\n'
+                    
+        htmlCode += '</div>\n'
+        htmlCode += '</td>\n'
+        if(i%rowSize==0):
+            htmlCode += '</tr>'
+        i = i + 1
+    if(htmlCode[-5:]!="</tr>"):
+        htmlCode += "</tr>"
+    htmlCode += "</table>\n"
     return htmlCode

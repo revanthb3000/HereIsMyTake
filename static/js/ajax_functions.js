@@ -45,7 +45,7 @@ function changeLikeStatus(likeLink, imageId, likeCountId){
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			if(xmlhttp.responseText!="Invalid"){
 				imageLink = document.getElementById(imageId).src;
-				if(imageLink.indexOf("Positive.png") > -1){ //Check if it's a follow image present for now.
+				if(imageLink.indexOf("Positive.png") > -1){ //Check if it's a thumbs up for now.
 					document.getElementById(imageId).src = imageLink.replace("Positive.png","Negative.png");
 				}
 				else{
