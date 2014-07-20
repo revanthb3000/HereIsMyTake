@@ -142,7 +142,7 @@ def getNewTakes():
 Given a tileId, this function will generate code for all that tile's children.
 """
 def getTilesCodeByParentId():
-    parentId = request.vars.parentId
+    parentId = int(request.vars.parentId)
     topics = databaseQueries.getSubTopics(db, parentId)
     topicsList = []
     for topic in topics:
