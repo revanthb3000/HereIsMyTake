@@ -4,13 +4,13 @@
 </div>
 
 <script type="text/javascript">
-    function loadTiles(ajaxUrl){   
+    function loadTiles(ajaxUrl){
         $.ajax({
             url: ajaxUrl,
             type:'POST',
             data: "",
             success: function(html){
-                  $("#tilesContent").html(html);	
+                  $("#tilesContent").html(html);
             }
         });
     	return false;

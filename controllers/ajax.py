@@ -2,6 +2,7 @@
 This is the ajax.py controller that's contains controllers used to perform backgroun functions (like generating html code) used by ajax functions.
 """
 from applications.HereIsMyTake import modules
+from calendar import week
 
 # Stuff to get eclipse autocomplete to work. Dead code !
 if 0:
@@ -94,6 +95,7 @@ def getNewTakes():
     pageNumber = int(request.vars.pageNumber)
     topicId = int(request.vars.topicId)
     tagId = int(request.vars.tagId)
+    numOfHours = int(request.vars.numOfHours)
     
     ignoredTakesList = []
     ignoredTakesListStr = request.vars.ignoredTakesList
@@ -114,8 +116,10 @@ def getNewTakes():
             userIdList.append(int(element))
 
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    fromDate = datetime.datetime.now() - datetime.timedelta(hours = numOfHours)
     rangeLowerLimit = pageNumber*items_per_page + 1
+    if(pageNumber == 0):
+        rangeLowerLimit = 0
     rangeUpperLimit = (pageNumber+1)*items_per_page
     
     """    

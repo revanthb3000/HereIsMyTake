@@ -22,6 +22,8 @@ import MySQLdb
 import datetime
 
 global items_per_page
+global numOfHours
+numOfHours = 50*52*24*7
 items_per_page=10
 
 def index():
@@ -268,11 +270,9 @@ def generalFeed():
     pageNumber = 0
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page
-
-    alternateSortURL = ""
     
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    fromDate = datetime.datetime.now() - datetime.timedelta(hours=numOfHours)
     
     topicId = 0
     tagId = 0
@@ -282,15 +282,15 @@ def generalFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(1, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
-    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = "replaceMEPageNumber", 
                                                           ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
-                                                          tagId = tagId, userIdList = userIdList))
-    if(sortParameter!="Date"):
-        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Date"))
-    else:
-        alternateSortURL = URL('takes','generalFeed',vars=dict(sortParameter = "Like"))
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
+    
+    alternateSortURL = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = 0, 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
 
-    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL, loadContentLink = loadContentLink)
+    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL, sortParameter = sortParameter, numOfHours = numOfHours, loadContentLink = loadContentLink)
 
 
 """
@@ -318,11 +318,9 @@ def topicFeed():
     pageNumber = 0
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page
-
-    alternateSortURL = ""
-
+    
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    fromDate = datetime.datetime.now() - datetime.timedelta(hours=numOfHours)
     
     tagId = 0
     ignoredTakesList = []
@@ -331,15 +329,15 @@ def topicFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(2, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
-    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 2, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = "replaceMEPageNumber", 
                                                           ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
-                                                          tagId = tagId, userIdList = userIdList))
-    if(sortParameter!="Date"):
-        alternateSortURL = URL('takes','topicFeed',vars=dict(topicId = topicId, sortParameter = "Date"))
-    else:
-        alternateSortURL = URL('takes','topicFeed',vars=dict(topicId = topicId, sortParameter = "Like"))
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
+    
+    alternateSortURL = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = 0, 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
 
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
+    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL, sortParameter = sortParameter, numOfHours = numOfHours, loadContentLink = loadContentLink)
     
 """
 The tag feed control. Given a tagId, this will give you the list of takes in paginated form.
@@ -367,11 +365,9 @@ def tagFeed():
     pageNumber = 0
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page
-
-    alternateSortURL = ""
-
+    
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    fromDate = datetime.datetime.now() - datetime.timedelta(hours=numOfHours)
     
     topicId = 0
     ignoredTakesList = []
@@ -380,16 +376,15 @@ def tagFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(3, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
-    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 3, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = "replaceMEPageNumber", 
                                                           ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
-                                                          tagId = tagId, userIdList = userIdList))
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
     
-    if(sortParameter!="Date"):
-        alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Date"))
-    else:
-        alternateSortURL = URL('takes','tagFeed',vars=dict(tagId = tagId, sortParameter = "Like"))
+    alternateSortURL = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = 0, 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
 
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
+    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL, sortParameter = sortParameter, numOfHours = numOfHours, loadContentLink = loadContentLink)
 
 """
 This is the subscription feed where you get the takes posted by the users you follow.
@@ -411,10 +406,8 @@ def subscriptionFeed():
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page
 
-    alternateSortURL = ""
-
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    fromDate = datetime.datetime.now() - datetime.timedelta(hours=numOfHours)
     
     topicId = 0
     tagId = 0
@@ -423,15 +416,15 @@ def subscriptionFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(4, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
-    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 4, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = "replaceMEPageNumber", 
                                                           ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
-                                                          tagId = tagId, userIdList = userIdList))
-    if(sortParameter!="Date"):
-        alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Date"))
-    else:
-        alternateSortURL = URL('takes','subscriptionFeed',vars=dict(sortParameter = "Like"))
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
+
+    alternateSortURL = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = 0, 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
     
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
+    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL, sortParameter = sortParameter, numOfHours = numOfHours, loadContentLink = loadContentLink)
 
 """
 This is the user activity feed. All the user's recent activities are retrieved and displayed over here.
@@ -455,10 +448,8 @@ def userActivityFeed():
     rangeLowerLimit = pageNumber*items_per_page
     rangeUpperLimit = (pageNumber+1)*items_per_page
 
-    alternateSortURL = ""
-
     toDate = datetime.datetime.now()
-    fromDate = datetime.datetime.now() - datetime.timedelta(weeks=50*52)
+    fromDate = datetime.datetime.now() - datetime.timedelta(hours=numOfHours)
     
     topicId = 0
     tagId = 0
@@ -467,16 +458,15 @@ def userActivityFeed():
     feedCode = utilityFunctions.getRequiredTakesHTML(4, sortParameter, db, fromDate, toDate, rangeLowerLimit, rangeUpperLimit, 
                                                          ignoredTakesList, ignoredUserList, topicId, tagId, userIdList)
     
-    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 4, sortParameter = sortParameter, pageNumber = "replaceMEPageNumber", 
+    loadContentLink = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = "replaceMEPageNumber", 
                                                           ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
-                                                          tagId = tagId, userIdList = userIdList))
-    
-    if(sortParameter!="Date"):
-        alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Date"))
-    else:
-        alternateSortURL = URL('takes','userActivityFeed',vars=dict(userId = userId, sortParameter = "Like"))
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
 
-    return dict(feedCode=feedCode, alternateSortURL=alternateSortURL, loadContentLink = loadContentLink)
+    alternateSortURL = URL('ajax','getNewTakes', vars=dict(feedType = 1, sortParameter = "replaceMESortParameter", pageNumber = 0, 
+                                                          ignoredTakesList = ignoredTakesList, ignoredUserList = ignoredUserList, topicId = topicId,
+                                                          tagId = tagId, userIdList = userIdList, numOfHours = "replaceMENumOfHours"))
+
+    return dict(feedCode = feedCode, alternateSortURL = alternateSortURL, sortParameter = sortParameter, numOfHours = numOfHours, loadContentLink = loadContentLink)
 
 """
 This is the tiles page. Contains a tiles list of topics that can be expanded for another layer.

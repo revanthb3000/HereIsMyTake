@@ -1,43 +1,109 @@
 {{right_sidebar_enabled=True}}
 {{extend 'layout.html'}}
 {{block right_sidebar}}
-<a href="{{=alternateSortURL}}">
-	{{
-		if ("Date" in alternateSortURL):
-			="Newest Takes"
-		else:
-			="Most Liked Takes"
-		pass
-	}}
-</a>
+
+<b>Options :</b>
+<br/>
+<br/>
+<select id="flipSort" onchange="loadNewSortedContent()">
+  <option value="1">Newest Takes</option>
+  <option value="2">Most Liked Takes</option>
+</select>
+
+<br/>
+<br/>
+<select id="durationFilter" onchange="loadNewDurationContent()">
+  <option value="1">Last Hour</option>
+  <option value="24">Last 24 Hours</option>
+  <option value="168">Last Week</option>
+  <option value="436800" selected="selected">All Time</option>
+</select> 
+
 {{end}}
 
+<input type="hidden" id="sortParameter" value="{{=sortParameter}}"/>
+<input type="hidden" id="numOfHours" value="{{=numOfHours}}"/>
+
 <script type="text/javascript">
-            var count = 1;
-            $(window).scroll(function(){
-                    if  ($(window).scrollTop() == $(document).height() - $(window).height()){
-                   	   if(count>4){
-                            return false;
-                   	   }
-                   	   url = "{{=XML(loadContentLink)}}"
-                   	   ajaxUrl = url.replace('replaceMEPageNumber',count)
-                       loadArticle(ajaxUrl);
-                       count++;
-                    }
-            });
- 
-            function loadArticle(ajaxUrl){   
-                    $.ajax({
-                        url: ajaxUrl,
-                        type:'POST',
-                        data: "",
-                        success: function(html){
-                              $('a#inifiniteLoader').hide('1000');
-                              $("#content").append(html);	
-                        }
-                    });
-                return false;
+	var count = 1;
+	
+	function loadNewSortedContent(){
+   	   ajaxUrl = "{{=XML(alternateSortURL)}}"
+	   element = document.getElementById("numOfHours");
+	   numOfHours = element.value;
+	   
+	   element = document.getElementById("sortParameter");
+	   
+	   if(element.value=="Date"){
+		   element.value = "Like"
+	   }
+	   else{
+		   element.value = "Date"
+	   }
+	   
+	   sortParameter = element.value;
+   	   ajaxUrl = ajaxUrl.replace('replaceMESortParameter',sortParameter)
+   	   ajaxUrl = ajaxUrl.replace('replaceMENumOfHours',numOfHours)
+   	   changeSort(ajaxUrl)
+	   count = 1;
+	}
+	
+	function loadNewDurationContent(){
+	   	   ajaxUrl = "{{=XML(alternateSortURL)}}"
+		   
+		   element = document.getElementById("sortParameter");
+		   sortParameter = element.value;
+
+		   element = document.getElementById("numOfHours");
+		   durationElement = document.getElementById("durationFilter");		   
+		   element.value = durationElement.value
+		   
+		   numOfHours = element.value;
+	   	   ajaxUrl = ajaxUrl.replace('replaceMESortParameter',sortParameter)
+	   	   ajaxUrl = ajaxUrl.replace('replaceMENumOfHours',numOfHours)
+	   	   changeSort(ajaxUrl)
+		   count = 1;
+		}
+
+    function changeSort(ajaxUrl){
+        $.ajax({
+            url: ajaxUrl,
+            type:'POST',
+            data: "",
+            success: function(html){
+                  $("#content").html(html);
             }
+        });
+    	return false;
+	}
+       
+   	$(window).scroll(function(){
+               if  ($(window).scrollTop() == $(document).height() - $(window).height()){
+		      	   ajaxUrl = "{{=XML(loadContentLink)}}"
+      			   element = document.getElementById("sortParameter");
+      			   sortParameter = element.value;
+      			   element = document.getElementById("numOfHours");
+				   numOfHours = element.value;
+		      	   ajaxUrl = ajaxUrl.replace('replaceMEPageNumber',count)
+		      	   ajaxUrl = ajaxUrl.replace('replaceMESortParameter',sortParameter)
+		      	   ajaxUrl = ajaxUrl.replace('replaceMENumOfHours',numOfHours)
+                   loadArticle(ajaxUrl);
+                   count++;
+               }
+       });
+
+       function loadArticle(ajaxUrl){   
+               $.ajax({
+                   url: ajaxUrl,
+                   type:'POST',
+                   data: "",
+                   success: function(html){
+                         $('a#inifiniteLoader').hide('1000');
+                         $("#content").append(html);	
+                   }
+               });
+           return false;
+       }
 </script>
 
 <div id="content">
